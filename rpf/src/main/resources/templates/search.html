@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Resumes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .skills-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 150px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible:hover {
+            background: #e9ecef;
+        }
+
+        .collapsible::before {
+            content: "▶ ";
+            font-size: 12px;
+            margin-right: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible.active::before {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .collapsible.active + .collapsible-content {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .skills-group {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-container">
+            <h1>
+                <span>🔍</span>
+                <span>Search Resumes</span>
+            </h1>
+            <p class="subtitle">Find resumes by name, skills, location, experience, and more</p>
+
+            <form th:action="@{/resumes/search}" method="post">
+                <!-- Basic Information -->
+                <div class="search-section">
+                    <h3>👤 Basic Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" placeholder="Enter last name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="Search in first or last name">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="search-section">
+                    <h3>📍 Location</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" placeholder="Enter city">
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" id="state" name="state" placeholder="Enter state">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="search-section">
+                    <div class="collapsible" onclick="toggleCollapsible(this)">
+                        <h3>💻 Skills & Technologies</h3>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="skills-group">
+                            <div class="form-group">
+                                <label for="programmingLanguages">Programming Languages</label>
+                                <input type="text" id="programmingLanguages" name="programmingLanguages"
+                                       placeholder="Java, Python, JavaScript (comma-separated)">
+                            </div>
+                            <div class="form-group">
+                                <label for="frameworks">Frameworks</label>
+                                <input type="text" id="frameworks" name="frameworks"
+                                       placeholder="Spring, React, Django (comma-separated)">
+                            </div>
+                            <div class="form-group">
+                                <label for="databases">Databases</label>
+                                <input type="text" id="databases" name="databases"
+                                       placeholder="MySQL, MongoDB, PostgreSQL (comma-separated)">
+                            </div>
+                            <div class="form-group">
+                                <label for="tools">Tools & Technologies</label>
+                                <input type="text" id="tools" name="tools"
+                                       placeholder="Git, Docker, AWS (comma-separated)">
+                            </div>
+                            <div class="form-group">
+                                <label for="cloudTechnologies">Cloud Technologies</label>
+                                <input type="text" id="cloudTechnologies" name="cloudTechnologies"
+                                       placeholder="AWS, Azure, GCP (comma-separated)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience -->
+                <div class="search-section">
+                    <div class="collapsible" onclick="toggleCollapsible(this)">
+                        <h3>💼 Experience</h3>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="companyName">Company Name</label>
+                                <input type="text" id="companyName" name="companyName" placeholder="Enter company name">
+                            </div>
+                            <div class="form-group">
+                                <label for="jobTitle">Job Title</label>
+                                <input type="text" id="jobTitle" name="jobTitle" placeholder="Enter job title">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div class="search-section">
+                    <div class="collapsible" onclick="toggleCollapsible(this)">
+                        <h3>🎓 Education</h3>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="degree">Degree</label>
+                                <input type="text" id="degree" name="degree" placeholder="Bachelor, Master, PhD">
+                            </div>
+                            <div class="form-group">
+                                <label for="institution">Institution</label>
+                                <input type="text" id="institution" name="institution" placeholder="University name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="major">Major/Field of Study</label>
+                                <input type="text" id="major" name="major" placeholder="Computer Science, Engineering">
+                            </div>
+                            <div class="form-group">
+                                <label for="degree">Degree</label>
+                                <input type="text" id="degree" name="degree" placeholder="Bachelor, Master, PhD">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Search -->
+                <div class="search-section">
+                    <div class="collapsible" onclick="toggleCollapsible(this)">
+                        <h3>⚙️ Advanced Search</h3>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="keyword">Keyword Search</label>
+                                <input type="text" id="keyword" name="keyword"
+                                       placeholder="Search across all resume content">
+                            </div>
+                            <div class="form-group">
+                                <label for="uploadedAfter">Uploaded After</label>
+                                <input type="date" id="uploadedAfter" name="uploadedAfter">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="uploadedBefore">Uploaded Before</label>
+                            <input type="date" id="uploadedBefore" name="uploadedBefore">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span>🔍</span>
+                        <span>Search Resumes</span>
+                    </button>
+                    <a th:href="@{/resumes/list}" class="btn btn-secondary">
+                        <span>📚</span>
+                        <span>View All</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleCollapsible(element) {
+            element.classList.toggle('active');
+        }
+
+        // Auto-expand first section
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstCollapsible = document.querySelector('.collapsible');
+            if (firstCollapsible) {
+                firstCollapsible.classList.add('active');
+                const content = firstCollapsible.nextElementSibling;
+                if (content) {
+                    content.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

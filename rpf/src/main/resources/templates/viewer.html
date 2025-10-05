@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Viewer - Professional View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Modern Header */
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header h1::before {
+            content: "📄";
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        /* Main Content Layout */
+        .main-container {
+            flex: 1;
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            background: #f1f5f9;
+            border-left-color: #3b82f6;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+
+        .sidebar-label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        .sidebar-value {
+            color: #1e293b;
+            font-size: 0.875rem;
+            margin-top: 0.125rem;
+        }
+
+        /* Resume Viewer Area */
+        .viewer-area {
+            flex: 1;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-toolbar {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .toolbar-info {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .toolbar-info strong {
+            color: #1e293b;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-tool {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .btn-tool:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .btn-tool.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .zoom-display {
+            padding: 0 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .content-container {
+            flex: 1;
+            padding: 2rem;
+            overflow: auto;
+            background: #fafafa;
+        }
+
+        .resume-content {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .resume-content iframe {
+            width: 100%;
+            min-height: 600px;
+            border: none;
+            background: white;
+        }
+
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-message {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            max-width: 400px;
+        }
+
+        .btn-retry {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .header-content {
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+
+            .viewer-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-left {
+                justify-content: center;
+            }
+
+            .content-container {
+                padding: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .sidebar, .viewer-toolbar {
+                display: none !important;
+            }
+
+            .main-container {
+                margin: 0;
+                padding: 0;
+            }
+
+            .content-container {
+                padding: 0;
+            }
+
+            .resume-content iframe {
+                box-shadow: none;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .loading::before {
+            content: "";
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.75rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="header-content">
+                <h1>Resume Viewer</h1>
+                <div class="header-actions">
+                    <a th:href="@{/resumes/download/{id}(id=${resumeId})}" class="btn btn-primary">
+                        <span>⬇️</span>
+                        <span>Download Original</span>
+                    </a>
+                    <a th:href="@{/resumes/search}" class="btn btn-secondary">
+                        <span>🔍</span>
+                        <span>Search</span>
+                    </a>
+                    <a th:href="@{/resumes/list}" class="btn btn-outline">
+                        <span>📚</span>
+                        <span>All Resumes</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <!-- Sidebar with Resume Info -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <span>📋</span>
+                        <span>Resume Details</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <div class="sidebar-icon">🆔</div>
+                        <div>
+                            <div class="sidebar-label">Resume ID</div>
+                            <div class="sidebar-value" th:text="${resumeId}">RES-001</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <span>⚙️</span>
+                        <span>View Controls</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <div class="sidebar-icon">🖨️</div>
+                        <button class="btn-tool" onclick="window.print()" style="width: 100%; justify-content: flex-start;">
+                            <span>🖨️</span>
+                            <span>Print Resume</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <span>🔍</span>
+                        <span>Zoom Controls</span>
+                    </div>
+                    <div class="zoom-controls">
+                        <button class="btn-tool" onclick="zoomOut()">−</button>
+                        <div class="zoom-display" id="zoomLevel">100%</div>
+                        <button class="btn-tool" onclick="zoomIn()">+</button>
+                    </div>
+                    <button class="btn-tool" onclick="resetZoom()" style="width: 100%; margin-top: 0.5rem;">
+                        <span>↺</span>
+                        <span>Reset Zoom</span>
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <span>🎯</span>
+                        <span>Quick Actions</span>
+                    </div>
+                    <a th:href="@{/resumes/upload}" class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 0.5rem;">
+                        <span>➕</span>
+                        <span>Upload New Resume</span>
+                    </a>
+                    <a th:href="@{/resumes/search}" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                        <span>🔍</span>
+                        <span>Search Resumes</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Resume Viewer Area -->
+            <div class="viewer-area">
+                <div class="viewer-toolbar">
+                    <div class="toolbar-left">
+                        <div class="toolbar-info">
+                            <strong>Viewing Resume:</strong> <span th:text="${resumeId}">RES-001</span>
+                        </div>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn-tool" onclick="window.print()">🖨️ Print</button>
+                        <div class="zoom-controls">
+                            <button class="btn-tool" onclick="zoomOut()">−</button>
+                            <div class="zoom-display" id="zoomLevelMobile">100%</div>
+                            <button class="btn-tool" onclick="zoomIn()">+</button>
+                        </div>
+                        <button class="btn-tool" onclick="resetZoom()">↺ Reset</button>
+                    </div>
+                </div>
+
+                <div class="content-container">
+                    <div th:if="${htmlContent != null and htmlContent != ''}" class="resume-content">
+                        <iframe id="resumeFrame" th:srcdoc="${htmlContent}"></iframe>
+                    </div>
+                    <div th:if="${error != null}" class="error-state">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-title">Resume Not Found</div>
+                        <div class="error-message" th:text="${error}">The requested resume could not be loaded.</div>
+                        <button onclick="window.location.reload()" class="btn-retry">Try Again</button>
+                    </div>
+                    <div th:if="${htmlContent == null and error == null}" class="loading">
+                        Loading resume content...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentZoom = 100;
+        const zoomLevels = [50, 75, 100, 125, 150, 200];
+
+        function updateZoomDisplay() {
+            document.getElementById('zoomLevel').textContent = currentZoom + '%';
+            document.getElementById('zoomLevelMobile').textContent = currentZoom + '%';
+        }
+
+        function zoomIn() {
+            const currentIndex = zoomLevels.indexOf(currentZoom);
+            if (currentIndex < zoomLevels.length - 1) {
+                currentZoom = zoomLevels[currentIndex + 1];
+                applyZoom();
+            }
+        }
+
+        function zoomOut() {
+            const currentIndex = zoomLevels.indexOf(currentZoom);
+            if (currentIndex > 0) {
+                currentZoom = zoomLevels[currentIndex - 1];
+                applyZoom();
+            }
+        }
+
+        function resetZoom() {
+            currentZoom = 100;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const frame = document.getElementById('resumeFrame');
+            if (frame) {
+                const scale = currentZoom / 100;
+                frame.style.transform = `scale(${scale})`;
+                frame.style.transformOrigin = 'top left';
+                frame.style.width = `${100 / scale}%`;
+                frame.style.height = `${600 / scale}px`;
+                updateZoomDisplay();
+            }
+        }
+
+        // Initialize zoom display
+        updateZoomDisplay();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '+':
+                    case '=':
+                        e.preventDefault();
+                        zoomIn();
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        zoomOut();
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        resetZoom();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        window.print();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

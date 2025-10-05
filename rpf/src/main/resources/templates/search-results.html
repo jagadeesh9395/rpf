@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .results-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .results-count {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .results-label {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .search-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-summary h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-criteria {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .criteria-item {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .criteria-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .criteria-value {
+            color: #666;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .no-results {
+            background: white;
+            border-radius: 15px;
+            padding: 60px 30px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-results-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .no-results h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .no-results p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .resumes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .resume-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .resume-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .resume-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .resume-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .resume-meta {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .resume-meta strong {
+            color: #333;
+        }
+
+        .resume-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .resume-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: #e8f0fe;
+            color: #1967d2;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .experience-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .experience-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .experience-company {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .experience-dates {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .education-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .education-degree {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .education-institution {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .resume-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #5568d3;
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .results-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .resumes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-criteria {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="results-header">
+            <div class="results-info">
+                <div class="results-count" th:text="${resultCount}">0</div>
+                <div class="results-label">Resumes Found</div>
+            </div>
+            <div class="header-actions">
+                <a th:href="@{/resumes/search}" class="btn btn-secondary">
+                    <span>🔍</span>
+                    <span>New Search</span>
+                </a>
+                <a th:href="@{/resumes/list}" class="btn btn-primary">
+                    <span>📚</span>
+                    <span>View All</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Summary -->
+        <div th:if="${searchCriteria}" class="search-summary">
+            <h3>🔍 Search Criteria Applied</h3>
+            <div class="search-criteria">
+                <div th:if="${searchCriteria.firstName}" class="criteria-item">
+                    <div class="criteria-label">First Name</div>
+                    <div class="criteria-value" th:text="${searchCriteria.firstName}">John</div>
+                </div>
+                <div th:if="${searchCriteria.lastName}" class="criteria-item">
+                    <div class="criteria-label">Last Name</div>
+                    <div class="criteria-value" th:text="${searchCriteria.lastName}">Doe</div>
+                </div>
+                <div th:if="${searchCriteria.city}" class="criteria-item">
+                    <div class="criteria-label">City</div>
+                    <div class="criteria-value" th:text="${searchCriteria.city}">New York</div>
+                </div>
+                <div th:if="${searchCriteria.state}" class="criteria-item">
+                    <div class="criteria-label">State</div>
+                    <div class="criteria-value" th:text="${searchCriteria.state}">California</div>
+                </div>
+                <div th:if="${searchCriteria.programmingLanguages}" class="criteria-item">
+                    <div class="criteria-label">Programming Languages</div>
+                    <div class="criteria-value" th:text="${#strings.listJoin(searchCriteria.programmingLanguages, ', ')}">Java, Python</div>
+                </div>
+                <div th:if="${searchCriteria.frameworks}" class="criteria-item">
+                    <div class="criteria-label">Frameworks</div>
+                    <div class="criteria-value" th:text="${#strings.listJoin(searchCriteria.frameworks, ', ')}">Spring, React</div>
+                </div>
+                <div th:if="${searchCriteria.companyName}" class="criteria-item">
+                    <div class="criteria-label">Company</div>
+                    <div class="criteria-value" th:text="${searchCriteria.companyName}">Google</div>
+                </div>
+                <div th:if="${searchCriteria.keyword}" class="criteria-item">
+                    <div class="criteria-label">Keyword</div>
+                    <div class="criteria-value" th:text="${searchCriteria.keyword}">machine learning</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results -->
+        <div th:if="${resumes.isEmpty()}" class="no-results">
+            <div class="no-results-icon">🔍</div>
+            <h2>No Resumes Found</h2>
+            <p>Try adjusting your search criteria or upload more resumes</p>
+            <a th:href="@{/resumes/search}" class="btn btn-primary">
+                <span>🔍</span>
+                <span>Modify Search</span>
+            </a>
+        </div>
+
+        <!-- Search Results -->
+        <div th:if="${!resumes.isEmpty()}" class="resumes-grid">
+            <div th:each="resume : ${resumes}" class="resume-card">
+                <div class="resume-header">
+                    <div class="resume-title" th:text="${resume.originalFileName}">Resume.pdf</div>
+                </div>
+
+                <!-- Basic Info -->
+                <div class="resume-section">
+                    <div class="section-title">👤 Personal Information</div>
+                    <div class="resume-meta" th:if="${resume.firstName}">
+                        <span>👤</span>
+                        <span th:text="${resume.firstName + ' ' + (resume.lastName ?: '')}">John Doe</span>
+                    </div>
+                    <div class="resume-meta" th:if="${resume.email}">
+                        <span>✉️</span>
+                        <span th:text="${resume.email}">john.doe@example.com</span>
+                    </div>
+                    <div class="resume-meta" th:if="${resume.phone}">
+                        <span>📞</span>
+                        <span th:text="${resume.phone}">+1-234-567-8900</span>
+                    </div>
+                    <div class="resume-meta" th:if="${resume.city != null or resume.state != null}">
+                        <span>📍</span>
+                        <span th:text="${resume.city + (resume.state != null ? ', ' + resume.state : '')}">New York, NY</span>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="resume-section" th:if="${resume.skills}">
+                    <div class="section-title">💻 Skills</div>
+                    <div class="skills-list">
+                        <span th:if="${resume.skills.programmingLanguages}" th:each="skill : ${resume.skills.programmingLanguages}" class="skill-tag" th:text="${skill}">Java</span>
+                        <span th:if="${resume.skills.frameworks}" th:each="skill : ${resume.skills.frameworks}" class="skill-tag" th:text="${skill}">Spring</span>
+                        <span th:if="${resume.skills.databases}" th:each="skill : ${resume.skills.databases}" class="skill-tag" th:text="${skill}">MySQL</span>
+                        <span th:if="${resume.skills.tools}" th:each="skill : ${resume.skills.tools}" class="skill-tag" th:text="${skill}">Git</span>
+                    </div>
+                </div>
+
+                <!-- Experience -->
+                <div class="resume-section" th:if="${resume.experience}">
+                    <div class="section-title">💼 Experience</div>
+                    <div th:each="exp : ${resume.experience}" class="experience-item">
+                        <div class="experience-title" th:text="${exp.jobTitle}">Software Engineer</div>
+                        <div class="experience-company" th:text="${exp.companyName}">Google Inc.</div>
+                        <div class="experience-dates">
+                            <span th:if="${exp.startDate}" th:text="${#temporals.format(exp.startDate, 'MMM yyyy')}">Jan 2020</span>
+                            <span th:if="${exp.startDate and exp.endDate}"> - </span>
+                            <span th:if="${exp.endDate}" th:text="${#temporals.format(exp.endDate, 'MMM yyyy')}">Dec 2023</span>
+                            <span th:if="${exp.isCurrentPosition}"> (Current)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div class="resume-section" th:if="${resume.education}">
+                    <div class="section-title">🎓 Education</div>
+                    <div th:each="edu : ${resume.education}" class="education-item">
+                        <div class="education-degree" th:text="${edu.degree}">Bachelor of Science</div>
+                        <div class="education-institution" th:text="${edu.institution}">MIT</div>
+                        <div th:if="${edu.major}" style="color: #666; font-size: 12px;" th:text="'Major: ' + ${edu.major}">Major: Computer Science</div>
+                    </div>
+                </div>
+
+                <!-- Upload Info -->
+                <div class="resume-section">
+                    <div class="section-title">📅 Upload Information</div>
+                    <div class="resume-meta">
+                        <span>📅</span>
+                        <span th:text="${#temporals.format(resume.uploadedAt, 'MMM dd, yyyy HH:mm')}">Oct 05, 2023 14:30</span>
+                    </div>
+                    <div class="resume-meta">
+                        <span>💾</span>
+                        <span th:text="${resume.formattedFileSize != null ? resume.formattedFileSize : '0 KB'}">245.7 KB</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="resume-actions">
+                    <a th:href="@{/resumes/view/{id}(id=${resume.id})}"
+                       class="btn btn-small btn-view">
+                        👁️ View
+                    </a>
+                    <a th:href="@{/resumes/download/{id}(id=${resume.id})}"
+                       class="btn btn-small btn-download">
+                        ⬇️ Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
