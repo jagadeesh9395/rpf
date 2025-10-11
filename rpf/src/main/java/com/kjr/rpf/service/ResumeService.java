@@ -3,7 +3,6 @@ package com.kjr.rpf.service;
 import com.kjr.rpf.dto.ResumeSearchCriteria;
 import com.kjr.rpf.model.Resume;
 import com.kjr.rpf.repository.ResumeRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
@@ -13,9 +12,6 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
@@ -27,6 +23,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -166,11 +164,60 @@ public class ResumeService {
     }
 
     /**
-     * Get resume HTML content for viewing
+     * Mask personal information in text
+     * Only masks email addresses and phone numbers, leaves all other content as is
+     */
+    private String maskPersonalInfo(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        
+        // Mask email addresses - keep first 3 chars, then ***@mail
+        text = text.replaceAll("(?i)([a-zA-Z0-9._%+-]{3})[a-zA-Z0-9._%+-]*@[a-z0-9.-]+\\.[a-z]{2,}", "$1***@mail");
+        
+        // Mask phone numbers - keep last 4 digits, mask the rest with *
+        text = text.replaceAll("(\\+?\\(?\\d{1,3}\\)?[-.\s]?)?\\d{2,3}[-.\s]?\\d{2,3}[-.\s]?(\\d{4})", "******$2");
+        
+        return text;
+    }
+    
+    /**
+     * Get resume HTML content for viewing with optional masking of personal information
+     * @param id The resume ID
+     * @param maskPersonalInfo Whether to mask personal information
+     * @return The HTML content with optional masking
+     */
+    public String getResumeHtmlContent(String id, boolean maskPersonalInfo) {
+        Optional<Resume> resumeOpt = resumeRepository.findById(id);
+        if (resumeOpt.isEmpty()) {
+            return null;
+        }
+        
+        String htmlContent = resumeOpt.get().getHtmlContent();
+        
+        if (maskPersonalInfo) {
+            // Extract the content between <pre> tags to avoid breaking HTML
+            Pattern pattern = Pattern.compile("(?s)(?<=<pre>)(.*?)(?=</pre>)");
+            Matcher matcher = pattern.matcher(htmlContent);
+            StringBuffer sb = new StringBuffer();
+            
+            while (matcher.find()) {
+                String matchedText = matcher.group(1);
+                String processedText = escapeHtml(maskPersonalInfo(matchedText));
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(processedText));
+            }
+            matcher.appendTail(sb);
+            htmlContent = sb.toString();
+        }
+        
+        return htmlContent;
+    }
+    
+    /**
+     * Get resume HTML content for viewing without masking
      */
     public String getResumeHtmlContent(String id) {
-        Optional<Resume> resume = resumeRepository.findById(id);
-        return resume.map(Resume::getHtmlContent).orElse(null);
+        return getResumeHtmlContent(id, false);
     }
 
     /**
@@ -358,5 +405,16 @@ public class ResumeService {
                 (criteria.getUploadedAfter() != null && !criteria.getUploadedAfter().trim().isEmpty()) ||
                 (criteria.getUploadedBefore() != null && !criteria.getUploadedBefore().trim().isEmpty());
     }
-
+    
+    /**
+     * Save or update a resume in the database
+     * @param resume The resume to save or update
+     * @return The saved resume
+     */
+    public Resume saveResume(Resume resume) {
+        if (resume == null) {
+            throw new IllegalArgumentException("Resume cannot be null");
+        }
+        return resumeRepository.save(resume);
+    }
 }

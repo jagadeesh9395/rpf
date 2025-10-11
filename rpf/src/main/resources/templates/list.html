@@ -273,18 +273,10 @@
 
                 <div class="resume-actions">
                     <a th:href="@{/resumes/view/{id}(id=${resume.id})}" 
-                       class="btn btn-small btn-view">
-                        👁️ View
+                       class="btn btn-small btn-view"
+                       style="width: 100%; justify-content: center;">
+                        👁️ View Resume
                     </a>
-                    <a th:href="@{/resumes/download/{id}(id=${resume.id})}" 
-                       class="btn btn-small btn-download">
-                        ⬇️ Download
-                    </a>
-                    <button onclick="deleteResume(this)" 
-                            th:data-id="${resume.id}"
-                            class="btn btn-small btn-delete">
-                        🗑️ Delete
-                    </button>
                 </div>
             </div>
         </div>

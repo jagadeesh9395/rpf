@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -12,26 +13,31 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResumeSearchCriteria {
-    
+
     // Name search
     private String firstName;
     private String lastName;
     private String fullName; // Search in both first and last name
-    
+
     // Contact search
     private String email;
     private String phone;
-    
+
     // Location search
     private String city;
     private String state;
-    
+
     // Skills search
-    private List<String> programmingLanguages;
-    private List<String> frameworks;
-    private List<String> databases;
-    private List<String> tools;
-    private List<String> cloudTechnologies;
+    @Builder.Default
+    private List<String> programmingLanguages = new ArrayList<>();
+    @Builder.Default
+    private List<String> frameworks = new ArrayList<>();
+    @Builder.Default
+    private List<String> databases = new ArrayList<>();
+    @Builder.Default
+    private List<String> tools = new ArrayList<>();
+    @Builder.Default
+    private List<String> cloudTechnologies = new ArrayList<>();
     private String anySkill; // Search across all skill categories
 
     // Experience search
@@ -47,7 +53,7 @@ public class ResumeSearchCriteria {
 
     // General search
     private String keyword; // Search across all text fields
-    
+
     // Date range
     private String uploadedAfter; // ISO date string
     private String uploadedBefore; // ISO date string

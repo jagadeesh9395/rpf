@@ -48,8 +48,24 @@
             color: #333;
         }
 
-        .results-label {
-            color: #666;
+        .search-summary-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 20px;
+        }
+
+        .search-label {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .search-keyword {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
             font-size: 16px;
         }
 
@@ -161,14 +177,13 @@
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
             gap: 25px;
         }
-
         .resume-card {
             background: white;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
         }
 
         .resume-card:hover {
@@ -177,39 +192,9 @@
         }
 
         .resume-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .resume-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            word-break: break-word;
-            flex: 1;
-        }
-
-        .resume-meta {
-            color: #666;
-            font-size: 13px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .resume-meta strong {
-            color: #333;
-        }
-
-        .resume-section {
-            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
             padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 20px;
         }
 
         .resume-section:last-child {
@@ -226,27 +211,275 @@
             letter-spacing: 0.5px;
         }
 
-        .skills-list {
+        .contact-info-section {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-item strong {
+            color: #475569;
+            min-width: 80px;
+        }
+
+        .skills-preview {
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #10b981;
+        }
+
+        .skills-preview strong {
+            color: #059669;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .skills-text {
             display: flex;
             flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .skills-text span {
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #a7f3d0;
+        }
+
+        .content-preview {
+            background: #fefce8;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #eab308;
+        }
+
+        .content-preview strong {
+            color: #ca8a04;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-content {
+            color: #a16207;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Plain List Layout Styles */
+        .search-results-list {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .resume-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .resume-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .resume-header-simple {
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .resume-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 12px 0;
+        }
+
+        .file-metadata {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .file-info-item {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .file-info-item strong {
+            color: #374151;
+        }
+
+        .contact-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        .skill-tag {
-            background: #e8f0fe;
-            color: #1967d2;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 500;
+        .contact-item strong {
+            color: #1f2937;
+            min-width: 80px;
         }
 
-        .experience-item {
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f8f9fa;
+        .skills-section {
+            background: #f0f9ff;
             border-radius: 8px;
-            border-left: 3px solid #667eea;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .skills-section h4 {
+            color: #0c4a6e;
+            margin: 0 0 12px 0;
+            font-size: 16px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
+        }
+
+        .skill-category {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .skill-category strong {
+            color: #0c4a6e;
+            font-size: 14px;
+        }
+
+        .skill-category span {
+            color: #0c4a6e;
+            background: #e0f2fe;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .content-section {
+            background: #fefce8;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid #eab308;
+        }
+
+        .content-section h4 {
+            color: #a16207;
+            margin: 0 0 12px 0;
+            font-size: 16px;
+        }
+
+        .content-preview-box {
+            color: #a16207;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 16px;
+        }
+
+        .resume-full-content {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .content-frame iframe {
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .experience-title {
@@ -316,18 +549,195 @@
             background: #218838;
         }
 
+        /* New Styles for Improved Layout */
+        .candidate-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+        }
+
+        .resume-preview {
+            margin-bottom: 20px;
+        }
+
+        .preview-item {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .preview-item strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .skills-preview {
+            margin-top: 15px;
+        }
+
+        .skills-text {
+            margin-top: 8px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .skills-text strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .view-details-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn-view-details {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-view-details:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .resume-details {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-item {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            color: #555;
+        }
+
+        .detail-item strong {
+            color: #333;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .experience-detail,
+        .education-detail {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .exp-title,
+        .edu-degree {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .exp-company,
+        .edu-institution {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .exp-dates,
+        .edu-major {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .bottom-actions {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            padding: 16px 40px;
+            font-size: 16px;
+            border-radius: 12px;
+        }
+
         @media (max-width: 768px) {
             .results-header {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .resumes-grid {
+            .search-summary-text {
+                margin: 10px 0;
+                justify-content: center;
+            }
+
+            .file-metadata {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .contact-grid {
                 grid-template-columns: 1fr;
             }
 
-            .search-criteria {
+            .skills-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .resume-item {
+                padding: 16px;
+            }
+
+            .resume-title {
+                font-size: 20px;
             }
         }
     </style>
@@ -338,6 +748,10 @@
             <div class="results-info">
                 <div class="results-count" th:text="${resultCount}">0</div>
                 <div class="results-label">Resumes Found</div>
+            </div>
+            <div class="search-summary-text" th:if="${searchQuery}">
+                <span class="search-label">Search results for:</span>
+                <span class="search-keyword">"<span th:text="${searchQuery}">java developer</span>"</span>
             </div>
             <div class="header-actions">
                 <a th:href="@{/resumes/search}" class="btn btn-secondary">
@@ -351,146 +765,149 @@
             </div>
         </div>
 
-        <!-- Search Summary -->
-        <div th:if="${searchCriteria}" class="search-summary">
-            <h3>🔍 Search Criteria Applied</h3>
-            <div class="search-criteria">
-                <div th:if="${searchCriteria.firstName}" class="criteria-item">
-                    <div class="criteria-label">First Name</div>
-                    <div class="criteria-value" th:text="${searchCriteria.firstName}">John</div>
-                </div>
-                <div th:if="${searchCriteria.lastName}" class="criteria-item">
-                    <div class="criteria-label">Last Name</div>
-                    <div class="criteria-value" th:text="${searchCriteria.lastName}">Doe</div>
-                </div>
-                <div th:if="${searchCriteria.city}" class="criteria-item">
-                    <div class="criteria-label">City</div>
-                    <div class="criteria-value" th:text="${searchCriteria.city}">New York</div>
-                </div>
-                <div th:if="${searchCriteria.state}" class="criteria-item">
-                    <div class="criteria-label">State</div>
-                    <div class="criteria-value" th:text="${searchCriteria.state}">California</div>
-                </div>
-                <div th:if="${searchCriteria.programmingLanguages}" class="criteria-item">
-                    <div class="criteria-label">Programming Languages</div>
-                    <div class="criteria-value" th:text="${#strings.listJoin(searchCriteria.programmingLanguages, ', ')}">Java, Python</div>
-                </div>
-                <div th:if="${searchCriteria.frameworks}" class="criteria-item">
-                    <div class="criteria-label">Frameworks</div>
-                    <div class="criteria-value" th:text="${#strings.listJoin(searchCriteria.frameworks, ', ')}">Spring, React</div>
-                </div>
-                <div th:if="${searchCriteria.companyName}" class="criteria-item">
-                    <div class="criteria-label">Company</div>
-                    <div class="criteria-value" th:text="${searchCriteria.companyName}">Google</div>
-                </div>
-                <div th:if="${searchCriteria.keyword}" class="criteria-item">
-                    <div class="criteria-label">Keyword</div>
-                    <div class="criteria-value" th:text="${searchCriteria.keyword}">machine learning</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- No Results -->
-        <div th:if="${resumes.isEmpty()}" class="no-results">
-            <div class="no-results-icon">🔍</div>
-            <h2>No Resumes Found</h2>
-            <p>Try adjusting your search criteria or upload more resumes</p>
-            <a th:href="@{/resumes/search}" class="btn btn-primary">
-                <span>🔍</span>
-                <span>Modify Search</span>
-            </a>
-        </div>
-
-        <!-- Search Results -->
-        <div th:if="${!resumes.isEmpty()}" class="resumes-grid">
-            <div th:each="resume : ${resumes}" class="resume-card">
-                <div class="resume-header">
-                    <div class="resume-title" th:text="${resume.originalFileName}">Resume.pdf</div>
-                </div>
-
-                <!-- Basic Info -->
-                <div class="resume-section">
-                    <div class="section-title">👤 Personal Information</div>
-                    <div class="resume-meta" th:if="${resume.firstName}">
-                        <span>👤</span>
-                        <span th:text="${resume.firstName + ' ' + (resume.lastName ?: '')}">John Doe</span>
-                    </div>
-                    <div class="resume-meta" th:if="${resume.email}">
-                        <span>✉️</span>
-                        <span th:text="${resume.email}">john.doe@example.com</span>
-                    </div>
-                    <div class="resume-meta" th:if="${resume.phone}">
-                        <span>📞</span>
-                        <span th:text="${resume.phone}">+1-234-567-8900</span>
-                    </div>
-                    <div class="resume-meta" th:if="${resume.city != null or resume.state != null}">
-                        <span>📍</span>
-                        <span th:text="${resume.city + (resume.state != null ? ', ' + resume.state : '')}">New York, NY</span>
+        <!-- Search Results - Plain List Layout -->
+        <div th:if="${!resumes.isEmpty()}" class="search-results-list">
+            <div th:each="resume, iterStat : ${resumes}" class="resume-item">
+                <div class="resume-header-simple">
+                    <h3 class="resume-title" th:text="${resume.firstName != null ? (resume.firstName + ' ' + (resume.lastName != null ? resume.lastName : '')) : 'Resume Candidate'}">Jagadeeshwar Karanam</h3>
+                    <div class="file-metadata">
+                        <span class="file-info-item">
+                            <strong>Type:</strong> <span th:text="${resume.originalFileType}">PDF</span>
+                        </span>
+                        <span class="file-info-item">
+                            <strong>Size:</strong> <span th:text="${resume.formattedFileSize}">2.4 MB</span>
+                        </span>
+                        <span class="file-info-item">
+                            <strong>Uploaded:</strong> <span th:text="${#temporals.format(resume.uploadedAt, 'MMM d, yyyy')}">Jan 1, 2023</span>
+                        </span>
                     </div>
                 </div>
 
-                <!-- Skills -->
-                <div class="resume-section" th:if="${resume.skills}">
-                    <div class="section-title">💻 Skills</div>
-                    <div class="skills-list">
-                        <span th:if="${resume.skills.programmingLanguages}" th:each="skill : ${resume.skills.programmingLanguages}" class="skill-tag" th:text="${skill}">Java</span>
-                        <span th:if="${resume.skills.frameworks}" th:each="skill : ${resume.skills.frameworks}" class="skill-tag" th:text="${skill}">Spring</span>
-                        <span th:if="${resume.skills.databases}" th:each="skill : ${resume.skills.databases}" class="skill-tag" th:text="${skill}">MySQL</span>
-                        <span th:if="${resume.skills.tools}" th:each="skill : ${resume.skills.tools}" class="skill-tag" th:text="${skill}">Git</span>
-                    </div>
-                </div>
-
-                <!-- Experience -->
-                <div class="resume-section" th:if="${resume.experience}">
-                    <div class="section-title">💼 Experience</div>
-                    <div th:each="exp : ${resume.experience}" class="experience-item">
-                        <div class="experience-title" th:text="${exp.jobTitle}">Software Engineer</div>
-                        <div class="experience-company" th:text="${exp.companyName}">Google Inc.</div>
-                        <div class="experience-dates">
-                            <span th:if="${exp.startDate}" th:text="${#temporals.format(exp.startDate, 'MMM yyyy')}">Jan 2020</span>
-                            <span th:if="${exp.startDate and exp.endDate}"> - </span>
-                            <span th:if="${exp.endDate}" th:text="${#temporals.format(exp.endDate, 'MMM yyyy')}">Dec 2023</span>
-                            <span th:if="${exp.isCurrentPosition}"> (Current)</span>
+                <!-- Contact Information -->
+                <div class="contact-section">
+                    <div class="contact-grid">
+                        <div class="contact-item" th:if="${resume.email != null and !resume.email.isEmpty()}">
+                            <strong>📧 Email:</strong>
+                            <span th:text="${resume.maskedEmail}">te***@gmail.com</span>
+                        </div>
+                        <div class="contact-item" th:if="${resume.phone != null and !resume.phone.isEmpty()}">
+                            <strong>📱 Phone:</strong>
+                            <span th:text="${resume.maskedPhone}">****8381</span>
+                        </div>
+                        <div class="contact-item" th:if="${resume.city != null or resume.state != null}">
+                            <strong>📍 Location:</strong>
+                            <span th:text="${resume.city + (resume.state != null ? ', ' + resume.state : '')}">New York, NY</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Education -->
-                <div class="resume-section" th:if="${resume.education}">
-                    <div class="section-title">🎓 Education</div>
-                    <div th:each="edu : ${resume.education}" class="education-item">
-                        <div class="education-degree" th:text="${edu.degree}">Bachelor of Science</div>
-                        <div class="education-institution" th:text="${edu.institution}">MIT</div>
-                        <div th:if="${edu.major}" style="color: #666; font-size: 12px;" th:text="'Major: ' + ${edu.major}">Major: Computer Science</div>
+                <!-- Skills Section -->
+                <div class="skills-section" th:if="${resume.skills != null}">
+                    <h4>🛠 Skills & Technologies</h4>
+                    <div class="skills-grid">
+                        <div class="skill-category" th:if="${resume.skills.programmingLanguages != null and !resume.skills.programmingLanguages.isEmpty()}">
+                            <strong>Programming Languages:</strong>
+                            <span th:text="${#strings.listJoin(resume.skills.programmingLanguages, ', ')}">Java, Python, JavaScript</span>
+                        </div>
+                        <div class="skill-category" th:if="${resume.skills.frameworks != null and !resume.skills.frameworks.isEmpty()}">
+                            <strong>Frameworks:</strong>
+                            <span th:text="${#strings.listJoin(resume.skills.frameworks, ', ')}">Spring, React, Angular</span>
+                        </div>
+                        <div class="skill-category" th:if="${resume.skills.databases != null and !resume.skills.databases.isEmpty()}">
+                            <strong>Databases:</strong>
+                            <span th:text="${#strings.listJoin(resume.skills.databases, ', ')}">MySQL, MongoDB, PostgreSQL</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Upload Info -->
-                <div class="resume-section">
-                    <div class="section-title">📅 Upload Information</div>
-                    <div class="resume-meta">
-                        <span>📅</span>
-                        <span th:text="${#temporals.format(resume.uploadedAt, 'MMM dd, yyyy HH:mm')}">Oct 05, 2023 14:30</span>
-                    </div>
-                    <div class="resume-meta">
-                        <span>💾</span>
-                        <span th:text="${resume.formattedFileSize != null ? resume.formattedFileSize : '0 KB'}">245.7 KB</span>
+                <!-- Resume Content Preview -->
+                <div class="content-section" th:if="${searchQuery}">
+                    <h4>📄 Resume Content</h4>
+                    <div class="content-preview-box">
+                        <p>Click "View Full Resume" below to see the complete resume with your search terms highlighted.</p>
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="resume-actions">
-                    <a th:href="@{/resumes/view/{id}(id=${resume.id})}"
-                       class="btn btn-small btn-view">
-                        👁️ View
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-view"
+                            th:data-resume-id="${resume.id}"
+                            th:data-element-id="${'resume-' + iterStat.index}"
+                            onclick="toggleResume(this)">
+                        <span class="btn-icon">👁</span>
+                        <span>View Full Resume</span>
+                    </button>
+                    <a th:href="@{/resumes/download/} + ${resume.id}" class="btn btn-download">
+                        <span class="btn-icon">⬇</span>
+                        <span>Download Resume</span>
                     </a>
-                    <a th:href="@{/resumes/download/{id}(id=${resume.id})}"
-                       class="btn btn-small btn-download">
-                        ⬇️ Download
-                    </a>
+                </div>
+
+                <!-- Expandable Resume Content -->
+                <div th:id="'resume-' + ${iterStat.index}" class="resume-full-content" style="display: none;">
+                    <div class="content-frame">
+                        <iframe th:if="${isAuthenticated}" th:srcdoc="${resume.content}" style="width: 100%; min-height: 600px; border: none; background: white;" onload="this.style.height = (this.contentWindow.document.body.scrollHeight + 20) + 'px';">
+                            <!-- Authenticated user sees full content -->
+                        </iframe>
+                        <iframe th:unless="${isAuthenticated}" th:srcdoc="${resume.maskedContent}" style="width: 100%; min-height: 600px; border: none; background: white;" onload="this.style.height = (this.contentWindow.document.body.scrollHeight + 20) + 'px';">
+                            <!-- Unauthenticated user sees masked content -->
+                        </iframe>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
+
+    <script>
+        function toggleResume(button) {
+            const resumeId = button.getAttribute('data-resume-id');
+            const elementId = button.getAttribute('data-element-id');
+            const resumeDiv = document.getElementById(elementId);
+
+            if (resumeDiv.style.display === 'none' || resumeDiv.style.display === '') {
+                resumeDiv.style.display = 'block';
+                button.innerHTML = '<span class="btn-icon">🙈</span><span>Hide Resume</span>';
+
+                // Highlight search terms when expanding resume
+                setTimeout(() => highlightSearchTermsInResume(resumeId, elementId), 100);
+            } else {
+                resumeDiv.style.display = 'none';
+                button.innerHTML = '<span class="btn-icon">👁</span><span>View Resume</span>';
+            }
+        }
+
+        function highlightSearchTermsInResume(resumeId, elementId) {
+            const searchQuery = '[[${searchQuery}]]';
+            if (!searchQuery || searchQuery === 'null' || searchQuery.trim() === '') return;
+
+            const resumeDiv = document.getElementById(elementId);
+            if (!resumeDiv) return;
+
+            const terms = searchQuery.split(/[,\s]+/).filter(t => t.length > 2);
+            const iframe = resumeDiv.querySelector('iframe');
+
+            if (iframe && iframe.contentWindow) {
+                try {
+                    const iframeDoc = iframe.contentWindow.document;
+                    let content = iframeDoc.body.innerHTML;
+
+                    terms.forEach(term => {
+                        const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
+                        content = content.replace(regex, '<mark style="background-color: #fef08a; padding: 2px 4px; border-radius: 2px; font-weight: 600;">$1</mark>');
+                    });
+
+                    iframeDoc.body.innerHTML = content;
+                } catch (e) {
+                    // Cross-origin iframe access might be restricted
+                    console.log('Could not highlight terms in iframe');
+                }
+            }
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+    </script>
 </body>
 </html>

@@ -57,8 +57,20 @@
 
         .header-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 1rem;
             align-items: center;
+        }
+        
+        .header-actions .btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .header-actions .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .btn {
@@ -263,15 +275,6 @@
         .zoom-display {
             padding: 0 0.75rem;
             font-size: 0.875rem;
-            font-weight: 600;
-            color: #475569;
-            min-width: 60px;
-            text-align: center;
-        }
-
-        .content-container {
-            flex: 1;
-            padding: 2rem;
             overflow: auto;
             background: #fafafa;
         }
@@ -397,6 +400,45 @@
         }
 
         /* Loading Animation */
+        /* Login Banner Styles */
+        .login-banner {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .login-banner-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .login-banner i {
+            font-size: 2rem;
+            color: #3b82f6;
+        }
+        
+        .login-message {
+            text-align: left;
+            margin-right: 1.5rem;
+        }
+        
+        .login-message h4 {
+            margin: 0 0 0.25rem 0;
+            color: #1e293b;
+        }
+        
+        .login-message p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
         .loading {
             display: flex;
             align-items: center;
@@ -415,10 +457,156 @@
             animation: spin 1s linear infinite;
             margin-right: 0.75rem;
         }
+        
+        /* Toggle switch styling */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .toggle-label {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Context Badges */
+        .context-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+        
+        .context-badge.preview-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .context-badge.search-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+        
+        /* Enhanced Animations and Effects */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .resume-content {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .login-download-section {
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        /* Enhanced button hover effects */
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        /* Enhanced context badges */
+        .context-badge {
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Improved iframe styling */
+        .resume-content iframe {
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Better responsive design */
+        @media (max-width: 640px) {
+            .login-download-section {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .login-download-section h3 {
+                font-size: 1.25rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.875rem;
+            }
         }
     </style>
 </head>
@@ -428,17 +616,21 @@
             <div class="header-content">
                 <h1>Resume Viewer</h1>
                 <div class="header-actions">
-                    <a th:href="@{/resumes/download/{id}(id=${resumeId})}" class="btn btn-primary">
-                        <span>⬇️</span>
-                        <span>Download Original</span>
-                    </a>
-                    <a th:href="@{/resumes/search}" class="btn btn-secondary">
+                    <div th:if="${isPreview}" class="context-badge preview-badge">
+                        <span class="badge-icon">📤</span>
+                        <span>Upload Preview</span>
+                    </div>
+                    <div th:if="${isFromSearch}" class="context-badge search-badge">
+                        <span class="badge-icon">🔍</span>
+                        <span>Search Result</span>
+                    </div>
+                    <a th:href="@{/resumes/search}" class="btn btn-primary">
                         <span>🔍</span>
-                        <span>Search</span>
+                        <span>Search Resumes</span>
                     </a>
-                    <a th:href="@{/resumes/list}" class="btn btn-outline">
-                        <span>📚</span>
-                        <span>All Resumes</span>
+                    <a th:href="@{/resumes/upload}" class="btn btn-secondary">
+                        <span>📤</span>
+                        <span>Upload Resume</span>
                     </a>
                 </div>
             </div>
@@ -446,7 +638,7 @@
 
         <div class="main-container">
             <!-- Sidebar with Resume Info -->
-            <div class="sidebar">
+            <div class="sidebar" th:if="${isAuthenticated}">
                 <div class="sidebar-section">
                     <div class="sidebar-title">
                         <span>📋</span>
@@ -461,50 +653,7 @@
                     </div>
                 </div>
 
-                <div class="sidebar-section">
-                    <div class="sidebar-title">
-                        <span>⚙️</span>
-                        <span>View Controls</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <div class="sidebar-icon">🖨️</div>
-                        <button class="btn-tool" onclick="window.print()" style="width: 100%; justify-content: flex-start;">
-                            <span>🖨️</span>
-                            <span>Print Resume</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">
-                        <span>🔍</span>
-                        <span>Zoom Controls</span>
-                    </div>
-                    <div class="zoom-controls">
-                        <button class="btn-tool" onclick="zoomOut()">−</button>
-                        <div class="zoom-display" id="zoomLevel">100%</div>
-                        <button class="btn-tool" onclick="zoomIn()">+</button>
-                    </div>
-                    <button class="btn-tool" onclick="resetZoom()" style="width: 100%; margin-top: 0.5rem;">
-                        <span>↺</span>
-                        <span>Reset Zoom</span>
-                    </button>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">
-                        <span>🎯</span>
-                        <span>Quick Actions</span>
-                    </div>
-                    <a th:href="@{/resumes/upload}" class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 0.5rem;">
-                        <span>➕</span>
-                        <span>Upload New Resume</span>
-                    </a>
-                    <a th:href="@{/resumes/search}" class="btn btn-secondary" style="width: 100%; justify-content: center;">
-                        <span>🔍</span>
-                        <span>Search Resumes</span>
-                    </a>
-                </div>
+                <!-- View and Zoom Controls removed -->
             </div>
 
             <!-- Resume Viewer Area -->
@@ -512,106 +661,178 @@
                 <div class="viewer-toolbar">
                     <div class="toolbar-left">
                         <div class="toolbar-info">
-                            <strong>Viewing Resume:</strong> <span th:text="${resumeId}">RES-001</span>
+                            <strong>Viewing Resume:</strong> 
+                            <span th:if="${isAuthenticated}" th:text="${originalFileName}">resume.pdf</span>
+                            <span th:unless="${isAuthenticated}" class="masked-filename">
+                                <i class="fas fa-lock"></i> Protected Resume
+                            </span>
+                            <span class="file-meta">
+                                <span class="file-type" th:text="${fileType}">PDF</span>
+                                <span class="file-size" th:text="${fileSize}">2.4 MB</span>
+                                <span class="file-date" th:text="${#temporals.format(uploadDate, 'MMM d, yyyy')}">Jan 1, 2023</span>
+                            </span>
+                        </div>
+                        <div th:if="${isFromSearch and searchQuery}" class="search-highlight">
+                            <span class="highlight-label">Search Term:</span>
+                            <span class="highlight-term" th:text="${searchQuery}">Java Developer</span>
                         </div>
                     </div>
                     <div class="toolbar-actions">
-                        <button class="btn-tool" onclick="window.print()">🖨️ Print</button>
-                        <div class="zoom-controls">
-                            <button class="btn-tool" onclick="zoomOut()">−</button>
-                            <div class="zoom-display" id="zoomLevelMobile">100%</div>
-                            <button class="btn-tool" onclick="zoomIn()">+</button>
+                        <!-- Back button - different based on context -->
+                        <a th:if="${isPreview}" th:href="@{/resumes/upload}" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back to Upload
+                        </a>
+                        <a th:if="${isFromSearch}" th:href="@{/resumes/search}" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back to Search
+                        </a>
+                        <a th:unless="${isPreview or isFromSearch}" th:href="@{/resumes/list}" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                        
+                        <!-- Action buttons based on context -->
+                        <div th:if="${isPreview}">
+                            <button class="btn btn-secondary" onclick="window.print()">
+                                <i class="fas fa-print"></i> Print Preview
+                            </button>
+                            <a th:href="@{/resumes/download/} + ${resume.id}" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download Original
+                            </a>
                         </div>
-                        <button class="btn-tool" onclick="resetZoom()">↺ Reset</button>
+                        
+                        <div th:if="${isFromSearch}">
+                            <button class="btn btn-secondary" onclick="highlightSearchTerms()">
+                                <i class="fas fa-search"></i> Highlight Terms
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.print()">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                            <a th:href="@{/resumes/download/} + ${resume.id}" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                        
+                        <div th:unless="${isPreview or isFromSearch}">
+                            <button class="btn btn-secondary" onclick="window.print()">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                            <a th:href="@{/resumes/download/} + ${resume.id}" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
                     </div>
                 </div>
-
-                <div class="content-container">
-                    <div th:if="${htmlContent != null and htmlContent != ''}" class="resume-content">
-                        <iframe id="resumeFrame" th:srcdoc="${htmlContent}"></iframe>
+                    
+                    <div class="resume-content" th:if="${resume != null}">
+                        <iframe th:if="${isAuthenticated}" th:srcdoc="${content}" style="width: 100%; min-height: 600px; border: none; background: white;" onload="this.style.height = (this.contentWindow.document.body.scrollHeight + 20) + 'px';">
+                            <!-- Authenticated user sees full content -->
+                        </iframe>
+                        <iframe th:unless="${isAuthenticated}" th:srcdoc="${maskedContent}" style="width: 100%; min-height: 600px; border: none; background: white;" onload="this.style.height = (this.contentWindow.document.body.scrollHeight + 20) + 'px';">
+                            <!-- Unauthenticated user sees masked content -->
+                        </iframe>
                     </div>
-                    <div th:if="${error != null}" class="error-state">
+
+                    <!-- Login to Download Section - Centered at Bottom -->
+                    <div class="login-download-section" th:unless="${isAuthenticated}" style="
+                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                        border: 1px solid #e2e8f0;
+                        border-radius: 1rem;
+                        padding: 2rem;
+                        margin: 2rem auto;
+                        text-align: center;
+                        max-width: 600px;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    ">
+                        <div class="login-download-content">
+                            <div style="font-size: 3rem; color: #3b82f6; margin-bottom: 1rem;">🔐</div>
+                            <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem;">Login to Download Resume</h3>
+                            <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 1rem;">
+                                Unlock full access to download the original resume file and view complete details.
+                            </p>
+                            <a href="/login?redirect=/resumes/view/[[${resumeId}]]" class="btn btn-primary" style="
+                                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                                color: white;
+                                padding: 0.75rem 2rem;
+                                border-radius: 0.75rem;
+                                font-size: 1rem;
+                                font-weight: 600;
+                                text-decoration: none;
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 0.5rem;
+                                transition: all 0.2s ease;
+                                box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+                            ">
+                                <span>🔑</span>
+                                <span>Login & Download</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="error-state" th:if="${error != null}">
                         <div class="error-icon">⚠️</div>
                         <div class="error-title">Resume Not Found</div>
                         <div class="error-message" th:text="${error}">The requested resume could not be loaded.</div>
-                        <button onclick="window.location.reload()" class="btn-retry">Try Again</button>
+                        <a href="/resumes/list" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
                     </div>
-                    <div th:if="${htmlContent == null and error == null}" class="loading">
-                        Loading resume content...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                <script>
+        // Global variables
+        const resumeId = '[[${resumeId}]]';
+        const isMasked = [[${masked}]];
+        const isAuthenticated = [[${isAuthenticated}]];
+        const searchQuery = '[[${searchQuery}]]';
+        const isFromSearch = [[${isFromSearch}]];
 
-    <script>
-        let currentZoom = 100;
-        const zoomLevels = [50, 75, 100, 125, 150, 200];
-
-        function updateZoomDisplay() {
-            document.getElementById('zoomLevel').textContent = currentZoom + '%';
-            document.getElementById('zoomLevelMobile').textContent = currentZoom + '%';
-        }
-
-        function zoomIn() {
-            const currentIndex = zoomLevels.indexOf(currentZoom);
-            if (currentIndex < zoomLevels.length - 1) {
-                currentZoom = zoomLevels[currentIndex + 1];
-                applyZoom();
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadResumeContent();
+            
+            // Show/hide elements based on authentication
+            updateAuthElements();
+        
+            // Highlight search terms if from search results
+            if (isFromSearch && searchQuery) {
+                setTimeout(highlightSearchTerms, 1000); // Wait for content to load
             }
-        }
-
-        function zoomOut() {
-            const currentIndex = zoomLevels.indexOf(currentZoom);
-            if (currentIndex > 0) {
-                currentZoom = zoomLevels[currentIndex - 1];
-                applyZoom();
+        });
+{{ ... }}
+                return;
             }
+            window.print();
         }
-
-        function resetZoom() {
-            currentZoom = 100;
-            applyZoom();
+        
+        // Mask toggle functionality removed - always using masked view
+        function toggleMaskFromCheckbox() {
+            // No-op function - mask toggle is disabled
+            window.location.href = currentUrl.toString();
         }
-
-        function applyZoom() {
-            const frame = document.getElementById('resumeFrame');
-            if (frame) {
-                const scale = currentZoom / 100;
-                frame.style.transform = `scale(${scale})`;
-                frame.style.transformOrigin = 'top left';
-                frame.style.width = `${100 / scale}%`;
-                frame.style.height = `${600 / scale}px`;
-                updateZoomDisplay();
-            }
+        
+        // Highlight search terms in resume content
+        function highlightSearchTerms() {
+            if (!searchQuery || searchQuery === 'null' || searchQuery.trim() === '') return;
+            
+            const contentDiv = document.querySelector('.resume-content');
+            if (!contentDiv) return;
+            
+            const terms = searchQuery.split(/[,\s]+/).filter(t => t.length > 2);
+            let content = contentDiv.innerHTML;
+            
+            terms.forEach(term => {
+                const regex = new RegExp(`(${term})`, 'gi');
+                content = content.replace(regex, '<mark style="background-color: #fef08a; padding: 2px 4px; border-radius: 2px;">$1</mark>');
+            });
+            
+            contentDiv.innerHTML = content;
         }
-
-        // Initialize zoom display
-        updateZoomDisplay();
-
+        
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case '+':
-                    case '=':
-                        e.preventDefault();
-                        zoomIn();
-                        break;
-                    case '-':
-                        e.preventDefault();
-                        zoomOut();
-                        break;
-                    case '0':
-                        e.preventDefault();
-                        resetZoom();
-                        break;
-                    case 'p':
-                        e.preventDefault();
-                        window.print();
-                        break;
-                }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                window.print();
             }
+{{ ... }}
         });
     </script>
 </body>
