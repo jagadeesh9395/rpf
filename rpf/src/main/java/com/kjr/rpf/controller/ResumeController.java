@@ -3,6 +3,9 @@ package com.kjr.rpf.controller;
 import com.kjr.rpf.dto.ResumeSearchCriteria;
 import com.kjr.rpf.model.Resume;
 import com.kjr.rpf.service.ResumeService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -15,12 +18,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -53,7 +58,7 @@ public class ResumeController {
             } else {
                 resume.setFormattedFileSize("0 KB");
             }
-            
+
             // Ensure uploadedAt is set to current time if null
             if (resume.getUploadedAt() == null) {
                 resume.setUploadedAt(LocalDateTime.now());
@@ -90,9 +95,9 @@ public class ResumeController {
      * Upload resume document
      */
     @PostMapping("/upload")
-    public String uploadResume(@RequestParam("file") MultipartFile file, 
-                             HttpSession session,
-                             Model model) {
+    public String uploadResume(@RequestParam("file") MultipartFile file,
+                               HttpSession session,
+                               Model model) {
         try {
             if (file.isEmpty()) {
                 model.addAttribute("error", "Please select a file to upload");
@@ -100,10 +105,10 @@ public class ResumeController {
             }
 
             Resume resume = resumeService.uploadAndConvertResume(file);
-            
+
             // Store the uploaded resume ID in session for preview
             session.setAttribute("previewResumeId", resume.getId());
-            
+
             // Redirect to view with preview flag
             return "redirect:/resumes/view/" + resume.getId() + "?preview=true";
 
@@ -118,25 +123,25 @@ public class ResumeController {
      */
     private boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.isAuthenticated() && 
-               !(authentication.getPrincipal() instanceof String && authentication.getPrincipal().equals("anonymousUser"));
+        return authentication != null && authentication.isAuthenticated() &&
+                !(authentication.getPrincipal() instanceof String && authentication.getPrincipal().equals("anonymousUser"));
     }
 
     /**
      * View resume by ID with search context
      */
     @GetMapping("/view/{id}")
-    public String viewResume(@PathVariable String id, 
-                           @RequestParam(required = false) String preview,
-                           @RequestParam(required = false) String searchQuery,
-                           @RequestParam(required = false) String searchContext,
-                           HttpSession session,
-                           Model model) {
+    public String viewResume(@PathVariable String id,
+                             @RequestParam(required = false) String preview,
+                             @RequestParam(required = false) String searchQuery,
+                             @RequestParam(required = false) String searchContext,
+                             HttpSession session,
+                             Model model) {
         Optional<Resume> resumeOpt = resumeService.getResumeById(id);
         if (resumeOpt.isEmpty()) {
             return "redirect:/resumes/list?error=Resume+not+found";
         }
-        
+
         Resume resume = resumeOpt.get();
         model.addAttribute("resume", resume);
         model.addAttribute("resumeId", resume.getId());
@@ -145,21 +150,21 @@ public class ResumeController {
         model.addAttribute("fileSize", formatFileSize(resume.getOriginalFileSize()));
         model.addAttribute("uploadDate", resume.getUploadedAt());
         model.addAttribute("isAuthenticated", isAuthenticated());
-        
+
         // Check if this is a preview (from upload)
         boolean isPreview = "true".equalsIgnoreCase(preview);
         model.addAttribute("isPreview", isPreview);
-        
+
         // Check if this is from search results
         boolean isFromSearch = "true".equalsIgnoreCase(searchContext) || searchQuery != null;
         model.addAttribute("isFromSearch", isFromSearch);
         model.addAttribute("searchQuery", searchQuery);
-        
+
         // For authenticated users, show full content by default
         // For unauthenticated users or explicit mask request, show masked content
         boolean masked = !isAuthenticated() && !isPreview;
         model.addAttribute("masked", masked);
-        
+
         // Get the appropriate content based on authentication and masking preference
         String content = null;
         if (masked) {
@@ -169,19 +174,19 @@ public class ResumeController {
             // For authenticated users, get unmasked content
             content = resumeService.getResumeHtmlContent(id, false);
         }
-        
+
         // Add content to model - for template compatibility
         model.addAttribute("content", content);
         model.addAttribute("maskedContent", content); // For backward compatibility
-        
+
         // If this is a preview, store in session to allow download
         if (isPreview) {
             session.setAttribute("previewResumeId", id);
         }
-        
+
         return "viewer";
     }
-    
+
     /**
      * View unmasked resume (requires authentication)
      */
@@ -190,86 +195,160 @@ public class ResumeController {
         if (!isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+
         String htmlContent = resumeService.getResumeHtmlContent(id, false);
         if (htmlContent == null) {
             return ResponseEntity.notFound().build();
         }
-        
+
         return ResponseEntity.ok(htmlContent);
     }
-    
+
     /**
      * Download original resume file (requires authentication)
      */
     @GetMapping("/download/{id}")
-    public Object downloadResume(@PathVariable String id, 
-                               HttpSession session,
-                               HttpServletRequest request,
-                               RedirectAttributes redirectAttributes) {
-        String sessionId = session.getId();
-        
+    public String downloadResume(@PathVariable String id,
+                                 @RequestParam(required = false) String token,
+                                 @RequestParam(required = false) String download,
+                                 HttpSession session,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 RedirectAttributes redirectAttributes) throws IOException {
+
         // Check if this is a preview download (from upload page)
         String previewResumeId = (String) session.getAttribute("previewResumeId");
         boolean isPreview = id.equals(previewResumeId);
-        
+
         // For non-preview downloads, check authentication
         if (!isPreview && !isAuthenticated()) {
-            // Store the intended download URL for after login
             String referer = request.getHeader("referer");
             String redirectUrl = referer != null ? referer : "/resumes/view/" + id;
             session.setAttribute("loginRedirect", redirectUrl);
             return "redirect:/login?require_auth=1";
         }
-        
+
         try {
             Resume resume = resumeService.getResumeById(id)
                     .orElseThrow(() -> new RuntimeException("Resume not found with id: " + id));
-            
-            // For non-preview downloads, check download limits
-            if (!isPreview) {
-                if (resume.hasReachedDownloadLimit(sessionId)) {
-                    return "redirect:/download-limit-reached";
-                }
-                
-                // Track this download
-                if (!resume.trackDownload(sessionId)) {
-                    return "redirect:/download-limit-reached";
-                }
-                
-                // Save the updated resume with download tracking
-                resumeService.saveResume(resume);
-            }
-            
-            // Prepare the file for download
-            byte[] fileData = resume.getOriginalFileData();
-            String fileName = resume.getOriginalFileName() != null ?
-                    resume.getOriginalFileName() : "resume_" + id + ".pdf";
 
-            ByteArrayResource resource = new ByteArrayResource(fileData);
+            // If this is the initial download request (not the actual file download)
+            if (download == null) {
+                // For non-preview downloads, check download limits
+                if (!isPreview) {
+                    Integer downloadCount = (Integer) session.getAttribute("downloadCount");
+                    if (downloadCount == null) {
+                        downloadCount = 0;
+                    }
 
-            // If this is a preview, don't track as a full download
-            if (isPreview) {
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=\"" + fileName + "\"")
-                        .contentType(MediaType.parseMediaType(resume.getOriginalFileType()))
-                        .contentLength(fileData.length)
-                        .body(resource);
+                    final int MAX_DOWNLOADS_PER_SESSION = 3;
+                    if (downloadCount >= MAX_DOWNLOADS_PER_SESSION) {
+                        return "redirect:/resumes/download-limit-reached";
+                    }
+
+                    // Generate a new download token
+                    String downloadToken = UUID.randomUUID().toString();
+                    session.setAttribute("downloadToken", downloadToken);
+
+                    // Redirect to thank you page with the token
+                    redirectAttributes.addFlashAttribute("resumeId", id);
+                    redirectAttributes.addFlashAttribute("resumeName", resume.getOriginalFileName());
+                    redirectAttributes.addFlashAttribute("downloadToken", downloadToken);
+                    redirectAttributes.addFlashAttribute("downloadsRemaining", MAX_DOWNLOADS_PER_SESSION - downloadCount - 1);
+
+                    return "redirect:/resumes/thank-you";
+                }
+
+                // For previews, go directly to download
+                String downloadToken = "preview_" + UUID.randomUUID().toString();
+                session.setAttribute("downloadToken", downloadToken);
+                return "redirect:/resumes/download/" + id + "?token=" + downloadToken + "&download=true";
             }
-            
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + fileName + "\"")
-                    .contentType(MediaType.parseMediaType(resume.getOriginalFileType()))
-                    .contentLength(fileData.length)
-                    .body(resource);
-                    
+
+            // This is the actual file download request
+            if (Boolean.TRUE.toString().equals(download) || "true".equals(download)) {
+                // Verify download token for non-preview downloads
+                if (!isPreview) {
+                    String sessionToken = (String) session.getAttribute("downloadToken");
+                    if (sessionToken == null || !sessionToken.equals(token)) {
+                        return "redirect:/resumes/view/" + id + "?error=Invalid+download+token";
+                    }
+
+                    // Increment download count
+                    Integer downloadCount = (Integer) session.getAttribute("downloadCount");
+                    if (downloadCount == null) {
+                        downloadCount = 0;
+                    }
+                    session.setAttribute("downloadCount", downloadCount + 1);
+                }
+
+                // Set up file download headers
+                response.setContentType(resume.getOriginalFileType());
+                response.setHeader("Content-Disposition",
+                        "attachment; filename=\"" + resume.getOriginalFileName() + "\"");
+                response.setContentLength(resume.getOriginalFileData().length);
+
+                // Write file to response
+                try (OutputStream out = response.getOutputStream()) {
+                    out.write(resume.getOriginalFileData());
+                }
+
+                return null;
+            }
+
+            // If we get here, it's an invalid request
+            return "redirect:/resumes/view/" + id;
+
         } catch (Exception e) {
             log.error("Error downloading resume", e);
             redirectAttributes.addFlashAttribute("error", "Error downloading resume: " + e.getMessage());
             return "redirect:/resumes/view/" + id;
         }
+    }
+
+    /**
+     * Show thank you page for downloads
+     */
+    @GetMapping("/thank-you")
+    public String showThankYouPage(Model model, HttpSession session) {
+        // Check if we have the required attributes in the flash attributes
+        Map<String, ?> flashAttributes = RequestContextUtils.getInputFlashMap(
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
+
+        if (flashAttributes == null || !flashAttributes.containsKey("resumeId")) {
+            return "redirect:/resumes/list";
+        }
+
+        // Add all flash attributes to the model
+        model.addAllAttributes(flashAttributes);
+
+        // Add session-specific attributes
+        Integer downloadCount = (Integer) session.getAttribute("downloadCount");
+        if (downloadCount != null) {
+            model.addAttribute("downloadsRemaining", 3 - downloadCount);
+        } else {
+            model.addAttribute("downloadsRemaining", 3);
+        }
+
+        return "download-thank-you";
+    }
+
+    /**
+     * Serve the actual file for download
+     */
+    private ResponseEntity<ByteArrayResource> serveFile(Resume resume) {
+        byte[] fileData = resume.getOriginalFileData();
+        String fileName = resume.getOriginalFileName() != null ?
+                resume.getOriginalFileName() : "resume_" + resume.getId() + ".pdf";
+
+        ByteArrayResource resource = new ByteArrayResource(fileData);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.parseMediaType(resume.getOriginalFileType()))
+                .contentLength(fileData.length)
+                .body(resource);
     }
 
     /**
@@ -333,7 +412,7 @@ public class ResumeController {
     public ResponseEntity<?> getAllResumes() {
         try {
             List<Resume> resumes = resumeService.getAllResumes();
-            
+
             // Format file sizes and mask sensitive data for each resume
             resumes.forEach(resume -> {
                 if (resume.getOriginalFileSize() != null) {
@@ -364,24 +443,24 @@ public class ResumeController {
             if (id == null || id.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Resume ID cannot be empty");
             }
-            
+
             return resumeService.getResumeById(id)
                     .map(resume -> {
                         // Format file size
                         if (resume.getOriginalFileSize() != null) {
                             resume.setFormattedFileSize(formatFileSize(resume.getOriginalFileSize()));
                         }
-                        
+
                         // Mask sensitive data for unauthenticated users
                         if (!isAuthenticated()) {
                             resume.setEmail(resume.getMaskedEmail());
                             resume.setPhone(resume.getMaskedPhone());
                         }
-                        
+
                         return ResponseEntity.ok(resume);
                     })
                     .orElse(ResponseEntity.notFound().build());
-                    
+
         } catch (Exception e) {
             log.error("Error retrieving resume with ID: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -402,14 +481,17 @@ public class ResumeController {
      */
     @PostMapping("/api/download-complete")
     @ResponseBody
-    public ResponseEntity<String> completeDownload(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<String> completeDownload(@RequestBody Map<String, String> payload,
+                                                   HttpSession session) {
         String token = payload.get("token");
-        if (token != null) {
-            // Mark download as complete in session
-            // This is a simple implementation - in production you might want to track this differently
+        String sessionToken = (String) session.getAttribute("downloadToken");
+
+        if (token != null && token.equals(sessionToken)) {
+            // Clear the token after successful download
+            session.removeAttribute("downloadToken");
             return ResponseEntity.ok("Download completed");
         }
-        return ResponseEntity.badRequest().body("Invalid token");
+        return ResponseEntity.badRequest().body("Invalid or expired token");
     }
 
     /**
@@ -435,7 +517,7 @@ public class ResumeController {
                 .keyword(query)
                 .uploadedBefore(uploadedBefore)
                 .build();
-                
+
         // Also set individual fields for backward compatibility
         criteria.setFullName(query);
         criteria.setCity(query);
@@ -445,7 +527,7 @@ public class ResumeController {
         criteria.setInstitution(query);
         criteria.setMajor(query);
         criteria.setDegree(query);
-        
+
         // Parse skills if provided
         if (query != null && !query.trim().isEmpty()) {
             List<String> skills = List.of(query.split("\\s*,\\s*"));
@@ -455,7 +537,7 @@ public class ResumeController {
             criteria.setTools(skills);
             criteria.setCloudTechnologies(skills);
         }
-        
+
         // Perform search
         List<Resume> searchResults = resumeService.searchResumes(criteria);
 
@@ -465,14 +547,14 @@ public class ResumeController {
             if (resume.getOriginalFileSize() != null) {
                 resume.setFormattedFileSize(formatFileSize(resume.getOriginalFileSize()));
             }
-            
+
             // Set masked content for unauthorized users
             if (!isAuthenticated) {
                 String maskedContent = resumeService.getResumeHtmlContent(resume.getId(), true);
                 resume.setHtmlContent(maskedContent);
             }
         }
-        
+
         model.addAttribute("resumes", searchResults);
         model.addAttribute("searchCriteria", criteria);
         model.addAttribute("resultCount", searchResults.size());
@@ -492,7 +574,7 @@ public class ResumeController {
             if (criteria == null) {
                 return ResponseEntity.badRequest().body("Search criteria cannot be null");
             }
-            
+
             List<Resume> results = resumeService.searchResumes(criteria);
             boolean isAuthenticated = isAuthenticated();
 
@@ -502,13 +584,13 @@ public class ResumeController {
                 if (resume.getOriginalFileSize() != null) {
                     resume.setFormattedFileSize(formatFileSize(resume.getOriginalFileSize()));
                 }
-                
+
                 // Mask sensitive data for unauthenticated users
                 if (!isAuthenticated) {
                     resume.setEmail(resume.getMaskedEmail());
                     resume.setPhone(resume.getMaskedPhone());
                 }
-                
+
                 // Truncate summary for search results
                 if (resume.getProfessionalSummary() != null && resume.getProfessionalSummary().length() > 150) {
                     resume.setProfessionalSummary(resume.getProfessionalSummary().substring(0, 150) + "...");
@@ -516,7 +598,7 @@ public class ResumeController {
             });
 
             return ResponseEntity.ok(results);
-            
+
         } catch (Exception e) {
             log.error("Error during resume search", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
