@@ -1,125 +1,436 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Resume Processing System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #f59e0b;
+            --secondary-hover: #d97706;
+            --success: #10b981;
+            --success-hover: #059669;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+        }
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin: 0;
+            padding: 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.5;
         }
-        .login-container {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        
+        .login-wrapper {
+            display: flex;
             width: 100%;
-            max-width: 400px;
+            max-width: 1100px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
-        .login-header {
+        
+        .login-illustration {
+            flex: 1;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            padding: 3rem;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+            display: none; /* Hide on mobile */
+        }
+        
+        .login-illustration img {
+            max-width: 100%;
             margin-bottom: 2rem;
         }
+        
+        .login-illustration h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .login-illustration p {
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 320px;
+        }
+        
+        .login-container {
+            flex: 1;
+            padding: 3rem;
+            max-width: 500px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .login-header img {
+            height: 48px;
+            margin-bottom: 1rem;
+        }
+        
         .login-header h1 {
-            color: #1e293b;
+            color: var(--dark);
+            font-size: 1.875rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
         }
+        
         .login-header p {
-            color: #64748b;
+            color: var(--gray);
             margin: 0;
+            font-size: 1rem;
         }
+        
         .form-group {
             margin-bottom: 1.5rem;
+            position: relative;
         }
+        
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #334155;
+            color: var(--dark);
             font-weight: 500;
+            font-size: 0.9375rem;
         }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
         .form-group input {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
         }
+        
         .form-group input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background-color: white;
         }
-        .btn-login {
-            width: 100%;
-            padding: 0.75rem;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
+        
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1.5rem 0;
+            font-size: 0.875rem;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .remember-me input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+        }
+        
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .forgot-password:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.5rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            width: 100%;
+            margin-bottom: 1rem;
         }
-        .btn-login:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        
+        .btn i {
+            margin-right: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-hover) 0%, #4f46e5 100%);
             transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1), 0 4px 6px -2px rgba(79, 70, 229, 0.05);
         }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #f59e0b 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, var(--secondary-hover) 0%, #d97706 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.1), 0 4px 6px -2px rgba(245, 158, 11, 0.05);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #10b981 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, var(--success-hover) 0%, #059669 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05);
+        }
+        
         .login-footer {
-            margin-top: 1.5rem;
+            margin-top: 2rem;
             text-align: center;
-            color: #64748b;
+            color: var(--gray);
             font-size: 0.875rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--light-gray);
         }
+        
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+        
         .alert {
-            padding: 0.75rem 1rem;
+            padding: 1rem;
             margin-bottom: 1.5rem;
             border-radius: 8px;
             font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
+        
+        .alert i {
+            font-size: 1.25rem;
+        }
+        
         .alert-error {
-            background-color: #fee2e2;
+            background-color: #fef2f2;
             color: #b91c1c;
             border: 1px solid #fecaca;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .divider:not(:empty)::before {
+            margin-right: 1rem;
+        }
+        
+        .divider:not(:empty)::after {
+            margin-left: 1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .action-buttons .btn {
+            margin-bottom: 0;
+            flex: 1;
+        }
+        
+        @media (min-width: 768px) {
+            .login-illustration {
+                display: flex;
+            }
+            
+            .login-container {
+                padding: 4rem;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .login-wrapper {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>Welcome Back</h1>
-            <p>Sign in to access your account</p>
-        </div>
-        
-        <div th:if="${param.error}" class="alert alert-error">
-            Invalid username or password.
-        </div>
-        
-        <form th:action="@{/login}" method="post">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+<div class="login-container">
+    <div class="login-header">
+        <img src="https://via.placeholder.com/48x48" alt="Logo" class="logo">
+        <h1>Welcome Back</h1>
+        <form th:action="@{/login}" method="post" class="login-form">
+            <div th:if="${param.error}" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>Invalid username or password. Please try again.</div>
             </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <div th:if="${param.logout}" class="alert" style="background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;">
+                <i class="fas fa-check-circle" style="color: #059669;"></i>
+                <div>You have been successfully logged out.</div>
             </div>
-            
-            <button type="submit" class="btn-login">Sign In</button>
+
+            <div class="form-group">
+                <label for="username">Email or Username</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="username" name="username" placeholder="Enter your email or username" required autofocus>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="d-flex justify-content-between">
+                    <label for="password">Password</label>
+                </div>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <i class="fas fa-eye-slash" id="togglePassword"
+                       style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--gray);"></i>
+                </div>
+            </div>
+
+            <div class="remember-forgot">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember-me" id="remember-me">
+                    Remember me
+                </label>
+                <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
         </form>
-        
+        <div class="action-buttons">
+            <a href="/search" class="btn btn-secondary">
+                <i class="fas fa-search"></i> New Search
+            </a>
+            <a href="/upload" class="btn btn-success">
+                <i class="fas fa-upload"></i> Upload Resume
+            </a>
+        </div>
+
+        <div class="divider">or</div>
+
         <div class="login-footer">
-            <p>Default credentials: admin / admin123</p>
+            <p>Don't have an account? <a href="#">Contact Admin</a> • <a href="#" class="forgot-password">Forgot Password?</a></p>
         </div>
     </div>
+</div>
+<script>
+    // Toggle password visibility
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+
+    if (togglePassword && password) {
+        togglePassword.addEventListener('click', function (e) {
+            // Toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            // Toggle the eye / eye slash icon
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    // Add focus styles for better accessibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+    });
+</script>
 </body>
 </html>
