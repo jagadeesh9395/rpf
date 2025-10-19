@@ -849,7 +849,7 @@
                         <iframe th:if="${isAuthenticated}" th:srcdoc="${resume.content}" style="width: 100%; min-height: 600px; border: none; background: white;" onload="this.style.height = (this.contentWindow.document.body.scrollHeight + 20) + 'px';">
                             <!-- Authenticated user sees full content -->
                         </iframe>
-                        <iframe th:unless="${isAuthenticated}" th:srcdoc="${resume.maskedContent}" style="width: 100%; min-height: 600px; border: none; background: white;" onload="this.style.height = (this.contentWindow.document.body.scrollHeight + 20) + 'px';">
+                        <iframe th:unless="${isAuthenticated}" th:srcdoc="${resume.htmlContent}" style="width: 100%; min-height: 600px; border: none; background: white;" onload="this.style.height = (this.contentWindow.document.body.scrollHeight + 20) + 'px';">
                             <!-- Unauthenticated user sees masked content -->
                         </iframe>
                     </div>

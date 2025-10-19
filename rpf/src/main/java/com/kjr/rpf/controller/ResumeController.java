@@ -455,22 +455,29 @@ public class ResumeController {
             criteria.setTools(skills);
             criteria.setCloudTechnologies(skills);
         }
-
+        
         // Perform search
         List<Resume> searchResults = resumeService.searchResumes(criteria);
 
-        // Format file sizes and prepare display data
+        // Format file sizes, prepare display data, and set masked content if needed
+        boolean isAuthenticated = isAuthenticated();
         for (Resume resume : searchResults) {
             if (resume.getOriginalFileSize() != null) {
                 resume.setFormattedFileSize(formatFileSize(resume.getOriginalFileSize()));
             }
+            
+            // Set masked content for unauthorized users
+            if (!isAuthenticated) {
+                String maskedContent = resumeService.getResumeHtmlContent(resume.getId(), true);
+                resume.setHtmlContent(maskedContent);
+            }
         }
-
+        
         model.addAttribute("resumes", searchResults);
         model.addAttribute("searchCriteria", criteria);
         model.addAttribute("resultCount", searchResults.size());
         model.addAttribute("searchQuery", query);
-        model.addAttribute("isAuthenticated", isAuthenticated());
+        model.addAttribute("isAuthenticated", isAuthenticated);
 
         return "search-results";
     }
