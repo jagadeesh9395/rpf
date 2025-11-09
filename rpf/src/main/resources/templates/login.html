@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,20 +19,19 @@
             background: linear-gradient(135deg, #f3e5ff 0%, #e0aaff 100%);
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .login-container {
             max-width: 1000px;
             width: 100%;
-            margin: 2rem auto;
             background: rgba(255, 255, 255, 0.97);
             border-radius: 15px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             display: flex;
-            min-height: 90vh;
+            min-height: 600px;
         }
         
         .login-illustration {
@@ -89,7 +88,9 @@
             padding: 3rem 2.5rem;
             width: 55%;
             position: relative;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .login-header {
@@ -241,7 +242,38 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{{/}}">RPF</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{{/}}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{{/upload}}">Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{{/search}}">Search</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span sec:authorize="!isAuthenticated()" class="me-3">
+                        <a th:href="@{{/login}}" class="btn btn-outline-light">Login</a>
+                    </span>
+                    <span sec:authorize="isAuthenticated()">
+                        <a th:href="@{{/logout}}" class="btn btn-outline-light">Logout</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 120px);">
         <div class="login-container">
             <div class="login-illustration d-none d-lg-flex">
                 <div>
@@ -314,12 +346,26 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-auto">
+        <div class="container text-center">
+            <div class="footer-links mb-3">
+                <a th:href="@{{/}}" class="text-white text-decoration-none me-3">Home</a>
+                <a th:href="@{{/upload}}" class="text-white text-decoration-none me-3">Upload</a>
+                <a th:href="@{{/search}}" class="text-white text-decoration-none me-3">Search</a>
+                <a th:href="@{{/login}}" sec:authorize="!isAuthenticated()" class="text-white text-decoration-none me-3">Login</a>
+                <a th:href="@{{/logout}}" sec:authorize="isAuthenticated()" class="text-white text-decoration-none">Logout</a>
+            </div>
+            <p class="mb-0">&copy; 2023 Resume Processing Framework. All rights reserved.</p>
+        </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Toggle password visibility
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
-        
+{{ ... }}
         if (togglePassword && password) {
             togglePassword.addEventListener('click', function (e) {
                 // Toggle the type attribute

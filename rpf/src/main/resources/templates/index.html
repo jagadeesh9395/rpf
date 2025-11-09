@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Processing Framework</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .feature-box {
+            padding: 30px;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #0d6efd;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            color: white;
+            padding: 5rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0 0 50% 50% / 10%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">RPF</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{{'/'}}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{{'/upload'}}">Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{{'/search'}}">Search</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span sec:authorize="!isAuthenticated()" class="me-3">
+                        <a th:href="@{{'/login'}}" class="btn btn-outline-light">Login</a>
+                    </span>
+                    <span sec:authorize="isAuthenticated()">
+                        <a th:href="@{{'/logout'}}" class="btn btn-outline-light">Logout</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">Resume Processing Framework</h1>
+            <p class="lead mb-4">Streamline your recruitment process with our powerful resume management system</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a th:href="@{{'/upload'}}" class="btn btn-light btn-lg px-4">
+                    <i class="fas fa-upload me-2"></i>Upload Resume
+                </a>
+                <a th:href="@{{'/search'}}" class="btn btn-outline-light btn-lg px-4">
+                    <i class="fas fa-search me-2"></i>Search Resumes
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="container my-5">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h3>Upload Resumes</h3>
+                    <p>Easily upload resumes in various formats. Our system will automatically parse and extract relevant information from each resume.</p>
+                    <a th:href="@{{'/upload'}}" class="btn btn-primary mt-3">Upload Now</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Search Resumes</h3>
+                    <p>Quickly find the perfect candidate with our powerful search functionality. Filter by skills, experience, education, and more.</p>
+                    <a th:href="@{{'/search'}}" class="btn btn-primary mt-3">Search Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="bg-light py-5">
+        <div class="container text-center">
+            <h2 class="mb-5">Why Choose Our Platform?</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="h1 text-primary mb-2"><i class="fas fa-bolt"></i></div>
+                    <h3>Fast Processing</h3>
+                    <p>Quickly process and index resumes for immediate searching.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="h1 text-primary mb-2"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Secure</h3>
+                    <p>Your data is protected with enterprise-grade security measures.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="h1 text-primary mb-2"><i class="fas fa-chart-line"></i></div>
+                    <h3>Analytics</h3>
+                    <p>Gain insights into your recruitment pipeline with detailed analytics.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2023 Resume Processing Framework. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
