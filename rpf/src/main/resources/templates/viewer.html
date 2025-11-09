@@ -689,7 +689,15 @@
         
             // Highlight search terms if from search results
             if (isFromSearch && searchQuery) {
-                setTimeout(highlightSearchTerms, 1000); // Wait for content to load
+                // Wait for iframe to load before highlighting
+                const iframe = document.querySelector('.resume-content iframe');
+                if (iframe) {
+                    iframe.onload = function() {
+                        setTimeout(highlightSearchTerms, 500);
+                    };
+                } else {
+                    setTimeout(highlightSearchTerms, 1000);
+                }
             }
         });
 {{ ... }}
@@ -708,18 +716,44 @@
         function highlightSearchTerms() {
             if (!searchQuery || searchQuery === 'null' || searchQuery.trim() === '') return;
             
-            const contentDiv = document.querySelector('.resume-content');
-            if (!contentDiv) return;
+            const resumeContent = document.querySelector('.resume-content');
+            if (!resumeContent) return;
             
-            const terms = searchQuery.split(/[,\s]+/).filter(t => t.length > 2);
-            let content = contentDiv.innerHTML;
+            const iframe = resumeContent.querySelector('iframe');
+            if (!iframe || !iframe.contentWindow) return;
             
-            terms.forEach(term => {
-                const regex = new RegExp(`(${term})`, 'gi');
-                content = content.replace(regex, '<mark style="background-color: #fef08a; padding: 2px 4px; border-radius: 2px;">$1</mark>');
-            });
-            
-            contentDiv.innerHTML = content;
+            try {
+                const iframeDoc = iframe.contentWindow.document;
+                let content = iframeDoc.body.innerHTML;
+                
+                // Split search query by spaces and commas, and filter out short terms
+                const terms = searchQuery.split(/[,\s]+/).filter(t => t.trim().length > 2);
+                
+                if (terms.length === 0) return;
+                
+                // Create a single regex pattern that matches any of the terms
+                const pattern = terms.map(escapeRegExp).join('|');
+                const regex = new RegExp(`(${pattern})`, 'gi');
+                
+                // Replace all occurrences with highlighted spans
+                content = content.replace(regex, (match) => {
+                    return `<mark style="background-color: #fef08a; padding: 2px 4px; border-radius: 2px; font-weight: 600;">${match}</mark>`;
+                });
+                
+                // Update the iframe content
+                iframeDoc.body.innerHTML = content;
+                
+                // Adjust iframe height after content is updated
+                iframe.style.height = (iframe.contentWindow.document.body.scrollHeight + 20) + 'px';
+                
+            } catch (e) {
+                console.error('Error highlighting search terms in iframe:', e);
+            }
+        }
+        
+        // Helper function to escape special regex characters
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
         
         // Keyboard shortcuts

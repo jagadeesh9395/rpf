@@ -14,21 +14,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <!-- Custom Fonts -->
     <style>
-        @import url('https://fonts.cdnfonts.com/css/orange-avenue');
         .brand-title {
-            font-family: 'Orange Avenue DEMO Regular', 'Playfair Display', serif;
+            font-family: 'Playfair Display', serif;
             font-weight: 700;
             letter-spacing: 1px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             line-height: 1.2;
-        }
-        @font-face {
-            font-family: 'Mollani';
-            src: url('https://db.onlinewebfonts.com/t/1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c.woff2') format('woff2'),
-                 url('https://db.onlinewebfonts.com/t/1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
         }
     <style>
         :root {
@@ -969,53 +960,152 @@
 
     <script>
         function toggleResume(button) {
-            const resumeId = button.getAttribute('data-resume-id');
-            const elementId = button.getAttribute('data-element-id');
-            const resumeDiv = document.getElementById(elementId);
-            const isExpanded = button.getAttribute('data-expanded') === 'true';
-            const icon = button.querySelector('i');
-            const textSpan = button.querySelector('span:not(.btn-icon)');
+            try {
+                if (!button) {
+                    console.error('Button element is null');
+                    return;
+                }
 
-            if (!isExpanded) {
-                resumeDiv.style.display = 'block';
-                icon.className = 'far fa-eye-slash me-2';
-                textSpan.textContent = 'Hide Resume';
-                button.setAttribute('data-expanded', 'true');
-                // Highlight search terms when expanding resume
-                setTimeout(() => highlightSearchTermsInResume(resumeId, elementId), 100);
-            } else {
-                resumeDiv.style.display = 'none';
-                icon.className = 'far fa-eye me-2';
-                textSpan.textContent = 'View Full Resume';
-                button.setAttribute('data-expanded', 'false');
+                const resumeId = button.getAttribute('data-resume-id');
+                const elementId = button.getAttribute('data-element-id');
+                const resumeDiv = document.getElementById(elementId);
+                
+                if (!resumeDiv) {
+                    console.error('Resume div not found:', elementId);
+                    return;
+                }
+                
+                const isExpanded = button.getAttribute('data-expanded') === 'true';
+                const icon = button.querySelector('i');
+                const textSpan = button.querySelector('span:not(.btn-icon)');
+
+                if (!isExpanded) {
+                    // Show the resume
+                    resumeDiv.style.display = 'block';
+                    
+                    // Update button state
+                    if (icon) icon.className = 'far fa-eye-slash me-2';
+                    if (textSpan) textSpan.textContent = 'Hide Resume';
+                    button.setAttribute('data-expanded', 'true');
+                    
+                    // Wait for the iframe to load before highlighting
+                    const iframe = resumeDiv.querySelector('iframe');
+                    if (iframe) {
+                        const onIframeLoad = () => {
+                            try {
+                                // Remove the event listener to prevent multiple triggers
+                                iframe.removeEventListener('load', onIframeLoad);
+                                // Add a small delay to ensure content is fully rendered
+                                setTimeout(() => {
+                                    highlightSearchTermsInResume(resumeId, elementId);
+                                }, 200);
+                            } catch (e) {
+                                console.error('Error in iframe load handler:', e);
+                            }
+                        };
+                        
+                        // Check if iframe is already loaded
+                        try {
+                            if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                                onIframeLoad();
+                            } else {
+                                iframe.addEventListener('load', onIframeLoad);
+                            }
+                        } catch (e) {
+                            console.error('Error accessing iframe content:', e);
+                        }
+                    }
+                } else {
+                    // Hide the resume
+                    resumeDiv.style.display = 'none';
+                    if (icon) icon.className = 'far fa-eye me-2';
+                    if (textSpan) textSpan.textContent = 'View Full Resume';
+                    button.setAttribute('data-expanded', 'false');
+                }
+            } catch (e) {
+                console.error('Error in toggleResume:', e);
             }
         }
 
         function highlightSearchTermsInResume(resumeId, elementId) {
+            console.log('Starting highlightSearchTermsInResume');
             const searchQuery = '[[${searchQuery}]]';
-            if (!searchQuery || searchQuery === 'null' || searchQuery.trim() === '') return;
+            console.log('Search query:', searchQuery);
+            
+            if (!searchQuery || searchQuery === 'null' || searchQuery.trim() === '') {
+                console.log('No search query provided');
+                return;
+            }
 
             const resumeDiv = document.getElementById(elementId);
-            if (!resumeDiv) return;
+            if (!resumeDiv) {
+                console.warn('Resume div not found:', elementId);
+                return;
+            }
 
-            const terms = searchQuery.split(/[,\s]+/).filter(t => t.length > 2);
+            const terms = searchQuery.split(/[,\s]+/).filter(t => t.trim().length > 2);
+            console.log('Search terms to highlight:', terms);
+            
+            if (terms.length === 0) {
+                console.log('No valid search terms to highlight');
+                return;
+            }
+
             const iframe = resumeDiv.querySelector('iframe');
+            console.log('Iframe found:', !!iframe);
 
             if (iframe && iframe.contentWindow) {
                 try {
                     const iframeDoc = iframe.contentWindow.document;
-                    let content = iframeDoc.body.innerHTML;
-
-                    terms.forEach(term => {
-                        const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
-                        content = content.replace(regex, '<mark style="background-color: #fef08a; padding: 2px 4px; border-radius: 2px; font-weight: 600;">$1</mark>');
-                    });
-
-                    iframeDoc.body.innerHTML = content;
+                    console.log('Iframe document accessed');
+                    
+                    // Create a temporary div to work with the content
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = iframeDoc.body.innerHTML;
+                    
+                    // Function to highlight text nodes
+                    const highlightTextNodes = (node) => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            let text = node.nodeValue;
+                            terms.forEach(term => {
+                                const regex = new RegExp(escapeRegExp(term), 'gi');
+                                text = text.replace(regex, match => 
+                                    `<span style="background-color: #ffff00; color: #000000; padding: 0 2px; border-radius: 3px; font-weight: 600;">${match}</span>`
+                                );
+                            });
+                            
+                            // Only replace if changes were made
+                            if (text !== node.nodeValue) {
+                                const wrapper = document.createElement('span');
+                                wrapper.innerHTML = text;
+                                node.parentNode.replaceChild(wrapper, node);
+                            }
+                        } else if (node.nodeType === Node.ELEMENT_NODE && 
+                                 !['SCRIPT', 'STYLE', 'TEXTAREA', 'IFRAME'].includes(node.tagName)) {
+                            // Process child nodes
+                            Array.from(node.childNodes).forEach(highlightTextNodes);
+                        }
+                    };
+                    
+                    // Process all text nodes in the body
+                    highlightTextNodes(tempDiv);
+                    
+                    // Update the iframe content
+                    iframeDoc.body.innerHTML = tempDiv.innerHTML;
+                    console.log('Highlighting applied');
+                    
+                    // Adjust iframe height after content is updated
+                    if (iframe.contentWindow.document.body) {
+                        const newHeight = iframe.contentWindow.document.body.scrollHeight + 20;
+                        iframe.style.height = newHeight + 'px';
+                        console.log('Iframe height adjusted to:', newHeight);
+                    }
+                    
                 } catch (e) {
-                    // Cross-origin iframe access might be restricted
-                    console.log('Could not highlight terms in iframe');
+                    console.error('Error highlighting terms in iframe:', e);
                 }
+            } else {
+                console.warn('Iframe not found or not accessible');
             }
         }
 
