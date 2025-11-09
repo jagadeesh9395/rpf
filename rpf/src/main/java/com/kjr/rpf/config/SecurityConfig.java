@@ -30,6 +30,7 @@ public class SecurityConfig {
                                 "/export/**"
                         ).hasRole("RECRUITER")
                         .requestMatchers("/resumes/upload").authenticated()
+                        .requestMatchers("/resumes/delete/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form

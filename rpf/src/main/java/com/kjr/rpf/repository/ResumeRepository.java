@@ -13,6 +13,8 @@ public interface ResumeRepository extends MongoRepository<Resume, String> {
     
     List<Resume> findByOriginalFileName(String fileName);
     
+    List<Resume> findByUploadedAtBefore(LocalDateTime date);
+    
     List<Resume> findByEmail(String email);
     
     List<Resume> findByFirstNameAndLastName(String firstName, String lastName);

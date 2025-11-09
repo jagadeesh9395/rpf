@@ -46,6 +46,21 @@ public class ResumeController {
     /**
      * Show all resumes page
      */
+    /**
+     * Delete a resume by ID (ADMIN only)
+     */
+    @PostMapping("/delete/{id}")
+    public String deleteResume(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        try {
+            resumeService.deleteResume(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Resume deleted successfully");
+        } catch (Exception e) {
+            log.error("Error deleting resume: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting resume: " + e.getMessage());
+        }
+        return "redirect:/resumes/list";
+    }
+
     @GetMapping("/list")
     public String showAllResumes(Model model) {
         List<Resume> resumes = resumeService.getAllResumes();

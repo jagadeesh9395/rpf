@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -274,9 +275,19 @@
                 <div class="resume-actions">
                     <a th:href="@{/resumes/view/{id}(id=${resume.id})}" 
                        class="btn btn-small btn-view"
-                       style="width: 100%; justify-content: center;">
+                       style="width: 100%; justify-content: center; margin-bottom: 8px;">
                         👁️ View Resume
                     </a>
+                    <form sec:authorize="hasRole('ADMIN')"
+                          th:action="@{/resumes/delete/{id}(id=${resume.id})}" 
+                          method="post" 
+                          style="width: 100%;">
+                        <button type="submit" class="btn btn-small btn-delete" 
+                                style="width: 100%; background: #ff6b6b;"
+                                onclick="return confirm('Are you sure you want to delete this resume? This action cannot be undone.')">
+                            🗑️ Delete Resume
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

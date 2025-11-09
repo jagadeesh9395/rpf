@@ -74,6 +74,13 @@
             <scope>test</scope>
         </dependency>
         
+        <!-- Thymeleaf Spring Security integration -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+        
         <!-- OpenCSV for CSV export functionality -->
         <dependency>
             <groupId>com.opencsv</groupId>

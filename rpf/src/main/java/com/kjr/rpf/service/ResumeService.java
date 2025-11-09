@@ -13,6 +13,7 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
@@ -33,6 +34,42 @@ public class ResumeService {
 
     private final ResumeRepository resumeRepository;
     private final Tika tika = new Tika();
+    
+    /**
+     * Deletes resumes older than the specified number of days
+     * @param days Number of days to keep resumes
+     * @return Number of resumes deleted
+     */
+    @Transactional
+    public long deleteResumesOlderThan(int days) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+        log.info("Deleting resumes older than {} days (before {})", days, cutoffDate);
+        List<Resume> oldResumes = resumeRepository.findByUploadedAtBefore(cutoffDate);
+        
+        if (!oldResumes.isEmpty()) {
+            log.info("Found {} resumes to delete", oldResumes.size());
+            resumeRepository.deleteAll(oldResumes);
+            log.info("Successfully deleted {} old resumes", oldResumes.size());
+        } else {
+            log.info("No old resumes found to delete");
+        }
+        
+        return oldResumes.size();
+    }
+    
+    /**
+     * Delete a single resume by ID
+     * @param id The ID of the resume to delete
+     * @throws IllegalArgumentException if resume with given ID is not found
+     */
+    @Transactional
+    public void deleteResume(String id) {
+        if (!resumeRepository.existsById(id)) {
+            throw new IllegalArgumentException("Resume not found with id: " + id);
+        }
+        resumeRepository.deleteById(id);
+        log.info("Deleted resume with id: {}", id);
+    }
 
 
     @Autowired
@@ -167,13 +204,6 @@ public class ResumeService {
         return resumeRepository.findAll();
     }
 
-    /**
-     * Delete resume by ID
-     */
-    public void deleteResume(String id) {
-        resumeRepository.deleteById(id);
-        log.info("Resume deleted with ID: {}", id);
-    }
 
     /**
      * Mask personal information in text
