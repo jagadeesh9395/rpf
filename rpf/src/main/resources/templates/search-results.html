@@ -1,45 +1,129 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
+    <title>Talent Trove - Search Results</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Custom Fonts -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @import url('https://fonts.cdnfonts.com/css/orange-avenue');
+        .brand-title {
+            font-family: 'Orange Avenue DEMO Regular', 'Playfair Display', serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            line-height: 1.2;
         }
-
+        @font-face {
+            font-family: 'Mollani';
+            src: url('https://db.onlinewebfonts.com/t/1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c.woff2') format('woff2'),
+                 url('https://db.onlinewebfonts.com/t/1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary-color: #1f2937;
+            --light-bg: #f9fafb;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px 0;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 0 15px;
         }
 
         .results-header {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 25px 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 20px;
+            border: 1px solid var(--border-color);
         }
 
         .results-info {
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .results-count {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .results-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+        
+        .export-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-export:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-export .btn-icon {
+            font-size: 14px;
         }
 
         .results-count {
@@ -750,8 +834,23 @@
     <div class="container">
         <div class="results-header">
             <div class="results-info">
-                <div class="results-count" th:text="${resultCount}">0</div>
-                <div class="results-label">Resumes Found</div>
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-file-alt fa-2x" style="color: var(--primary-color);"></i>
+                    <div>
+                        <div class="results-count" th:text="${resultCount}">0</div>
+                        <div class="results-label">Resumes Found</div>
+                    </div>
+                </div>
+                <div class="export-actions">
+                    <form th:action="@{/export/search-results}" method="get" style="display: inline;">
+                        <input type="hidden" th:name="query" th:value="${param.query}">
+                        <input type="hidden" th:name="uploadedBefore" th:value="${param.uploadedBefore}">
+                        <button type="submit" class="btn-export">
+                            <i class="fas fa-file-export me-2"></i>
+                            <span>Export to CSV</span>
+                        </button>
+                    </form>
+                </div>
             </div>
             <div class="search-summary-text" th:if="${searchQuery}">
                 <span class="search-label">Search results for:</span>
@@ -759,11 +858,11 @@
             </div>
             <div class="header-actions">
                 <a th:href="@{/resumes/search}" class="btn btn-secondary">
-                    <span>🔍</span>
+                    <i class="fas fa-search me-2"></i>
                     <span>New Search</span>
                 </a>
                 <a th:href="@{/resumes/list}" class="btn btn-primary">
-                    <span>📚</span>
+                    <i class="fas fa-list-ul me-2"></i>
                     <span>View All</span>
                 </a>
             </div>
@@ -791,16 +890,19 @@
                 <!-- Contact Information -->
                 <div class="contact-section">
                         <div class="contact-item" th:if="${resume.email != null and !resume.email.isEmpty()}">
-                            <strong>📧 Email:</strong>
-                            <span th:text="${resume.maskedEmail}">te***@gmail.com</span>
+                            <i class="far fa-envelope me-2 text-primary"></i>
+                            <strong>Email:</strong>
+                            <span th:text="${resume.maskedEmail}" class="ms-1">te***@gmail.com</span>
                         </div>
                         <div class="contact-item" th:if="${resume.phone != null and !resume.phone.isEmpty()}">
-                            <strong>📱 Phone:</strong>
-                            <span th:text="${resume.maskedPhone}">****8381</span>
+                            <i class="fas fa-phone-alt me-2 text-primary"></i>
+                            <strong>Phone:</strong>
+                            <span th:text="${resume.maskedPhone}" class="ms-1">****8381</span>
                         </div>
                         <div class="contact-item" th:if="${resume.city != null or resume.state != null}">
-                            <strong>📍 Location:</strong>
-                            <span th:text="${resume.city + (resume.state != null ? ', ' + resume.state : '')}">New York, NY</span>
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            <strong>Location:</strong>
+                            <span th:text="${resume.city + (resume.state != null ? ', ' + resume.state : '')}" class="ms-1">New York, NY</span>
                         </div>
                     </div>
                 </div>
@@ -870,16 +972,22 @@
             const resumeId = button.getAttribute('data-resume-id');
             const elementId = button.getAttribute('data-element-id');
             const resumeDiv = document.getElementById(elementId);
+            const isExpanded = button.getAttribute('data-expanded') === 'true';
+            const icon = button.querySelector('i');
+            const textSpan = button.querySelector('span:not(.btn-icon)');
 
-            if (resumeDiv.style.display === 'none' || resumeDiv.style.display === '') {
+            if (!isExpanded) {
                 resumeDiv.style.display = 'block';
-                button.innerHTML = '<span class="btn-icon">🙈</span><span>Hide Resume</span>';
-
+                icon.className = 'far fa-eye-slash me-2';
+                textSpan.textContent = 'Hide Resume';
+                button.setAttribute('data-expanded', 'true');
                 // Highlight search terms when expanding resume
                 setTimeout(() => highlightSearchTermsInResume(resumeId, elementId), 100);
             } else {
                 resumeDiv.style.display = 'none';
-                button.innerHTML = '<span class="btn-icon">👁</span><span>View Resume</span>';
+                icon.className = 'far fa-eye me-2';
+                textSpan.textContent = 'View Full Resume';
+                button.setAttribute('data-expanded', 'false');
             }
         }
 

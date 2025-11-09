@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Resume</title>
+    <title>Resume Parser | Upload Resume</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #7c3aed;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --border-radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,257 +30,753 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 2rem;
+            color: var(--dark);
+            line-height: 1.6;
         }
 
         .container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
             width: 100%;
+            max-width: 640px;
+            margin: 2rem auto;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: inline-block;
         }
 
         h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-            text-align: center;
+            color: var(--dark);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 14px;
+            color: #64748b;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.75rem;
+        }
+
+        .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 0 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .col-md-6 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #334155;
+            font-size: 0.9375rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            transition: var(--transition);
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-light);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background-color: white;
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+            opacity: 0.7;
+        }
+
+        .invalid-feedback {
+            display: none;
+            margin-top: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--error);
+            font-weight: 500;
+        }
+
+        .is-invalid {
+            border-color: var(--error) !important;
+        }
+
+        .is-invalid ~ .invalid-feedback {
+            display: block;
+            animation: shake 0.5s ease-in-out;
         }
 
         .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 40px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 2.5rem 1.5rem;
             text-align: center;
-            background: #f8f9ff;
-            transition: all 0.3s ease;
             cursor: pointer;
-            margin-bottom: 20px;
+            transition: var(--transition);
+            background-color: #f8fafc;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
         }
 
-        .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f2ff;
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background-color: #f0f5ff;
+            transform: translateY(-2px);
         }
 
-        .upload-icon {
-            font-size: 64px;
-            color: #667eea;
-            margin-bottom: 20px;
+        .upload-area i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: block;
+            transition: var(--transition);
         }
 
         .upload-text {
-            color: #333;
-            font-size: 18px;
-            margin-bottom: 10px;
-            font-weight: 600;
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
         }
 
         .upload-hint {
-            color: #999;
-            font-size: 14px;
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0;
         }
 
-        input[type="file"] {
+        #fileInput {
             display: none;
         }
 
         .file-name {
-            margin: 15px 0;
-            padding: 15px;
-            background: #e8f0fe;
-            border-radius: 10px;
-            color: #1967d2;
+            margin-top: 0.75rem;
+            font-size: 0.9375rem;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
             font-weight: 500;
-            display: none;
+        }
+
+        .file-name i {
+            color: var(--success);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            min-width: 140px;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            margin-bottom: 10px;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         .btn-primary:disabled {
-            background: #ccc;
+            background: #cbd5e1;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
-        .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+        .btn-outline {
+            background: transparent;
+            border-color: #cbd5e1;
+            color: #475569;
         }
 
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .links {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .links a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .links a:hover {
-            color: #764ba2;
+        .btn-outline:hover {
+            background-color: #f1f5f9;
+            border-color: #94a3b8;
         }
 
         .supported-formats {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff9e6;
-            border-radius: 10px;
-            border-left: 4px solid #ffc107;
+            margin-top: 2rem;
+            padding: 1.25rem;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.6s ease-out 0.4s both;
         }
 
         .supported-formats h3 {
-            color: #856404;
-            font-size: 14px;
-            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .supported-formats p {
-            color: #856404;
-            font-size: 12px;
+            color: #475569;
+            font-size: 0.875rem;
             line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .supported-formats .formats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .supported-formats .format-tag {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .links a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .links a:hover {
+            color: var(--primary);
+        }
+
+        .links a i {
+            font-size: 0.875rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Success/Error messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .alert i {
+            font-size: 1.25rem;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📄 Resume Upload</h1>
-        <p class="subtitle">Upload your resume and convert it to HTML format</p>
-
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-
-        <form id="uploadForm" th:action="@{/resumes/upload}" method="post" enctype="multipart/form-data">
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">Click to browse or drag and drop</div>
-                <div class="upload-hint">Maximum file size: 100MB</div>
-            </div>
-
-            <input type="file" id="fileInput" name="file" accept=".pdf,.doc,.docx,.txt,.rtf" required>
-            
-            <div id="fileName" class="file-name"></div>
-
-            <button type="submit" class="btn btn-primary" id="uploadBtn" disabled>
-                Upload Resume
-            </button>
-        </form>
-
-        <div class="links">
-            <a th:href="@{/resumes/list}">View All Resumes</a> |
-            <a th:href="@{/resumes/search}">Search Resumes</a>
+        <div class="header">
+            <i class="fas fa-file-upload"></i>
+            <h1>Upload Your Resume</h1>
+            <p class="subtitle">Easily upload and parse your resume in seconds</p>
         </div>
 
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <form id="uploadForm" th:action="@{/resumes/upload}" method="post" enctype="multipart/form-data" class="upload-form" onsubmit="return validateForm()">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                    <input type="text" id="firstName" name="firstName" class="form-control" 
+                           placeholder="Enter first name" required autocomplete="given-name">
+                    <div class="invalid-feedback">
+                        <i class="fas fa-exclamation-circle"></i> Please enter your first name
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <input type="text" id="lastName" name="lastName" class="form-control" 
+                           placeholder="Enter last name" required autocomplete="family-name">
+                    <div class="invalid-feedback">
+                        <i class="fas fa-exclamation-circle"></i> Please enter your last name
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Upload Resume <span class="text-danger">*</span></label>
+                <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="upload-text">Drag & drop your resume here</div>
+                    <div class="upload-hint">or click to browse files</div>
+                </div>
+                <input type="file" id="fileInput" name="file" accept=".pdf,.doc,.docx,.txt,.rtf" required>
+                <div id="fileName" class="file-name"></div>
+                <div class="invalid-feedback" id="fileError">
+                    <i class="fas fa-exclamation-circle"></i> Please select a resume file to upload
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="window.location.href='/resumes/list'">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </button>
+                <button type="submit" class="btn btn-primary" id="uploadBtn" disabled>
+                    <i class="fas fa-upload"></i> Upload Resume
+                    <span class="spinner" id="uploadSpinner"></span>
+                </button>
+            </div>
+        </form>
+
         <div class="supported-formats">
-            <h3>✓ Supported Formats</h3>
-            <p>PDF, DOC, DOCX, TXT, RTF and other document formats supported by Apache Tika</p>
+            <h3><i class="fas fa-file-alt"></i> Supported Formats</h3>
+            <p>We support all major document formats including:</p>
+            <div class="formats">
+                <span class="format-tag"><i class="far fa-file-pdf"></i> PDF</span>
+                <span class="format-tag"><i class="far fa-file-word"></i> DOC/DOCX</span>
+                <span class="format-tag"><i class="far fa-file-alt"></i> TXT</span>
+                <span class="format-tag"><i class="far fa-file"></i> RTF</span>
+            </div>
+        </div>
+
+        <div class="links">
+            <a th:href="@{/resumes/list}"><i class="fas fa-list"></i> View All Resumes</a>
+            <a th:href="@{/resumes/search}"><i class="fas fa-search"></i> Search Resumes</a>
         </div>
     </div>
 
     <script>
+        // DOM Elements
+        const form = document.getElementById('uploadForm');
         const fileInput = document.getElementById('fileInput');
         const fileName = document.getElementById('fileName');
         const uploadBtn = document.getElementById('uploadBtn');
-        const uploadArea = document.querySelector('.upload-area');
+        const dropZone = document.getElementById('dropZone');
+        const uploadSpinner = document.getElementById('uploadSpinner');
+        const fileError = document.getElementById('fileError');
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const maxFileSize = 100 * 1024 * 1024; // 100MB
 
-        fileInput.addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                fileName.textContent = '📎 ' + file.name + ' (' + formatFileSize(file.size) + ')';
-                fileName.style.display = 'block';
-                uploadBtn.disabled = false;
-            }
-        });
-
-        // Drag and drop functionality
-        uploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.style.borderColor = '#764ba2';
-            this.style.background = '#f0f2ff';
-        });
-
-        uploadArea.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            this.style.borderColor = '#667eea';
-            this.style.background = '#f8f9ff';
-        });
-
-        uploadArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.style.borderColor = '#667eea';
-            this.style.background = '#f8f9ff';
+        // Form validation
+        function validateForm() {
+            let isValid = true;
             
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                const event = new Event('change');
-                fileInput.dispatchEvent(event);
+            // Reset previous validations
+            [firstName, lastName, fileInput].forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+            
+            // Validate first name
+            if (!firstName.value.trim()) {
+                firstName.classList.add('is-invalid');
+                isValid = false;
+                // Scroll to the first error
+                firstName.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
             }
+            
+            // Validate last name
+            if (!lastName.value.trim()) {
+                lastName.classList.add('is-invalid');
+                isValid = false;
+                lastName.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+            
+            // Validate file
+            if (!fileInput.files || fileInput.files.length === 0) {
+                fileInput.classList.add('is-invalid');
+                fileError.textContent = 'Please select a file to upload';
+                fileError.style.display = 'block';
+                isValid = false;
+                fileInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+            
+            const file = fileInput.files[0];
+            
+            // Check file size
+            if (file.size > maxFileSize) {
+                fileInput.classList.add('is-invalid');
+                fileError.textContent = 'File size exceeds 100MB limit. Please choose a smaller file.';
+                fileError.style.display = 'block';
+                isValid = false;
+                return false;
+            }
+            
+            // Check file type
+            const validTypes = ['application/pdf', 'application/msword', 
+                               'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                               'text/plain', 'application/rtf'];
+            
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|txt|rtf)$/i)) {
+                fileInput.classList.add('is-invalid');
+                fileError.textContent = 'Invalid file type. Please upload a PDF, DOC, DOCX, TXT, or RTF file.';
+                fileError.style.display = 'block';
+                isValid = false;
+                return false;
+            }
+            
+            // If all validations pass, show loading state
+            if (isValid) {
+                uploadBtn.disabled = true;
+                uploadSpinner.style.display = 'inline-block';
+                uploadBtn.querySelector('i').className = 'fas fa-check';
+                uploadBtn.innerHTML = 'Uploading... <span class="spinner" id="uploadSpinner"></span>';
+            }
+            
+            return isValid;
+        }
+
+        // File input change handler
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files.length > 0) {
+                handleFiles(this.files);
+            }
+        });
+
+        // Handle dropped files
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight() {
+            dropZone.classList.remove('dragover');
+        }
+
+        // Handle dropped files
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFiles(files);
+        }
+
+        // Process selected files
+        function handleFiles(files) {
+            if (files && files.length > 0) {
+                const file = files[0];
+                const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/rtf'];
+                
+                // Validate file type
+                if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|txt|rtf)$/i)) {
+                    fileInput.value = '';
+                    fileName.textContent = '';
+                    fileInput.classList.add('is-invalid');
+                    fileError.textContent = 'Invalid file type. Please upload a PDF, DOC, DOCX, TXT, or RTF file.';
+                    fileError.style.display = 'block';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                
+                // Validate file size (max 100MB)
+                if (file.size > maxFileSize) {
+                    fileInput.value = '';
+                    fileName.textContent = '';
+                    fileInput.classList.add('is-invalid');
+                    fileError.textContent = `File is too large. Maximum size is ${formatFileSize(maxFileSize)}.`;
+                    fileError.style.display = 'block';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                // Update UI
+                fileName.innerHTML = `<i class="fas fa-file-alt"></i> ${file.name} <span class="file-size">(${formatFileSize(file.size)})</span>`;
+                fileInput.classList.remove('is-invalid');
+                fileError.style.display = 'none';
+                uploadBtn.disabled = !isFormValid();
+            } else {
+                fileName.textContent = '';
+                uploadBtn.disabled = true;
+            }
+        }
+
+        // Function to check if form is valid
+        function isFormValid() {
+            const isFirstNameValid = firstName.value.trim() !== '';
+            const isLastNameValid = lastName.value.trim() !== '';
+            const isFileSelected = fileInput.files && fileInput.files.length > 0;
+            
+            // Update validation states
+            if (!isFirstNameValid) {
+                firstName.classList.add('is-invalid');
+            } else {
+                firstName.classList.remove('is-invalid');
+            }
+            
+            if (!isLastNameValid) {
+                lastName.classList.add('is-invalid');
+            } else {
+                lastName.classList.remove('is-invalid');
+            }
+            
+            return isFirstNameValid && isLastNameValid && isFileSelected;
+        }
+        
+        // Real-time validation for name fields and file input
+        [firstName, lastName, fileInput].forEach(field => {
+            field.addEventListener('input', function() {
+                if (this === fileInput) {
+                    handleFiles(this.files);
+                }
+                uploadBtn.disabled = !isFormValid();
+            });
+        });
+        
+        // Also validate on blur for better UX
+        [firstName, lastName].forEach(field => {
+            field.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+                uploadBtn.disabled = !isFormValid();
+            });
+        });
+
+        // Function to format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Add animation to upload button when file is selected
+        uploadBtn.addEventListener('mouseenter', function() {
+            if (!this.disabled) {
+                this.style.animation = 'pulse 1.5s infinite';
+            }
+        });
+
+        uploadBtn.addEventListener('mouseleave', function() {
+            this.style.animation = '';
+        });
+
+        // Form submission handler
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show loading state
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        });
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animation to form elements
+            const formGroups = document.querySelectorAll('.form-group');
+            formGroups.forEach((group, index) => {
+                group.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Initialize file input
+            fileInput.value = '';
+            fileName.textContent = '';
         });
 
         function formatFileSize(bytes) {

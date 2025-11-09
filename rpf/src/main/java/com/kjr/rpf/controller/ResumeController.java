@@ -96,15 +96,32 @@ public class ResumeController {
      */
     @PostMapping("/upload")
     public String uploadResume(@RequestParam("file") MultipartFile file,
-                               HttpSession session,
-                               Model model) {
+                             @RequestParam("firstName") String firstName,
+                             @RequestParam("lastName") String lastName,
+                             HttpSession session,
+                             Model model) {
         try {
             if (file.isEmpty()) {
                 model.addAttribute("error", "Please select a file to upload");
                 return "upload";
             }
+            
+            // Validate first name and last name
+            if (firstName == null || firstName.trim().isEmpty()) {
+                model.addAttribute("error", "Please enter first name");
+                return "upload";
+            }
+            
+            if (lastName == null || lastName.trim().isEmpty()) {
+                model.addAttribute("error", "Please enter last name");
+                return "upload";
+            }
+            
+            // Clean the names
+            firstName = firstName.trim();
+            lastName = lastName.trim();
 
-            Resume resume = resumeService.uploadAndConvertResume(file);
+            Resume resume = resumeService.uploadAndConvertResume(file, firstName, lastName);
 
             // Store the uploaded resume ID in session for preview
             session.setAttribute("previewResumeId", resume.getId());
@@ -112,8 +129,9 @@ public class ResumeController {
             // Redirect to view with preview flag
             return "redirect:/resumes/view/" + resume.getId() + "?preview=true";
 
-        } catch (IOException e) {
-            log.error("Error uploading file", e);
+        } catch (Exception e) {
+            log.error("Error uploading file: {}", e.getMessage(), e);
+            model.addAttribute("error", "Error uploading file: " + e.getMessage());
             return "upload";
         }
     }

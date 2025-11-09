@@ -21,10 +21,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/resumes/upload", "/resumes/list", "/resumes/view/**").permitAll()
-                        .requestMatchers("/resumes/download/**", "/resumes/print/**", "/resumes/unmasked/**")
-                        .authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        .requestMatchers("/", "/search", "/resumes/search", "/resumes/list", "/resumes/view/**").permitAll()
+                        .requestMatchers(
+                                "/resumes/download/**", 
+                                "/resumes/print/**", 
+                                "/resumes/unmasked/**",
+                                "/export/**"
+                        ).hasRole("RECRUITER")
+                        .requestMatchers("/resumes/upload").authenticated()
+                        .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
@@ -33,9 +39,19 @@ public class SecurityConfig {
                 )
                 .logout((logout) ->
                         logout.permitAll()
-                                .logoutSuccessUrl("/resumes/list")
+                                .logoutSuccessUrl("/login?logout")
+                                .deleteCookies("JSESSIONID")
+                                .invalidateHttpSession(true)
                 )
-                .csrf(AbstractHttpConfigurer::disable);
+                .exceptionHandling(exception -> 
+                    exception.accessDeniedPage("/access-denied")
+                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> 
+                    session.maximumSessions(1)
+                           .maxSessionsPreventsLogin(true)
+                           .expiredUrl("/login?expired")
+                );
 
         return http.build();
     }
@@ -44,12 +60,17 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         // In a production environment, replace this with a proper UserDetailsService
         // that loads users from a database
-        UserDetails user = User.withUsername("jag")
-                .password(passwordEncoder().encode("Jag123"))
-                .roles("USER")
+        UserDetails recruiter = User.withUsername("recruiter")
+                .password(passwordEncoder().encode("recruiter@123"))
+                .roles("RECRUITER")
+                .build();
+                
+        UserDetails admin = User.withUsername("admin")
+                .password(passwordEncoder().encode("admin@123"))
+                .roles("ADMIN", "RECRUITER")
                 .build();
 
-        return new InMemoryUserDetailsManager(user);
+        return new InMemoryUserDetailsManager(recruiter, admin);
     }
 
     @Bean

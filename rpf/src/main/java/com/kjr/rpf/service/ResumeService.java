@@ -43,7 +43,7 @@ public class ResumeService {
     /**
      * Upload and convert document to HTML using Apache Tika
      */
-    public Resume uploadAndConvertResume(MultipartFile file) throws IOException {
+    public Resume uploadAndConvertResume(MultipartFile file, String firstName, String lastName) throws IOException {
         log.info("Processing file: {}", file.getOriginalFilename());
 
         // Check file size before processing to prevent overflow
@@ -59,10 +59,22 @@ public class ResumeService {
         resume.setOriginalFileSize(file.getSize());
         resume.setUploadedAt(LocalDateTime.now());
         resume.setOriginalFileData(file.getBytes());
-
+        
+        // Set the candidate's name from the form - save these values before any processing
+        String savedFirstName = firstName != null ? firstName.trim() : "";
+        String savedLastName = lastName != null ? lastName.trim() : "";
+        
         // Convert to HTML using Tika
         String htmlContent = convertToHtml(file.getBytes());
         resume.setHtmlContent(htmlContent);
+        
+        // Extract and set contact information (email and phone) from the parsed text
+        // Skip name extraction since we're getting it from the form
+        extractContactInfo(resume, htmlContent);
+        
+        // Ensure the names from the form are preserved and not overridden
+        resume.setFirstName(savedFirstName);
+        resume.setLastName(savedLastName);
 
         // Save to MongoDB
         Resume savedResume = resumeRepository.save(resume);
@@ -391,6 +403,214 @@ public class ResumeService {
         return finalResults;
     }
 
+    /**
+     * Extract and set contact information (email and phone) from HTML content
+     * @param resume The resume to update with contact information
+     * @param htmlContent The HTML content to extract information from
+     */
+    private void extractContactInfo(Resume resume, String htmlContent) {
+        // First, get plain text content without HTML tags
+        String textContent = htmlContent.replaceAll("<[^>]*>", " ").replaceAll("\\s+", " ").trim();
+        
+        // Only extract email if not already set
+        if (resume.getEmail() == null || resume.getEmail().isEmpty()) {
+            // Extract email with more precise pattern
+            Pattern emailPattern = Pattern.compile("\\bE[-]?mail\\s*[:]?\\s*([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})\\b");
+            Matcher emailMatcher = emailPattern.matcher(textContent);
+            if (emailMatcher.find()) {
+                String email = emailMatcher.group(1).trim();
+                resume.setEmail(email);
+            } else {
+                // Fallback to simple email pattern if the above doesn't match
+                emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
+                emailMatcher = emailPattern.matcher(textContent);
+                if (emailMatcher.find()) {
+                    String email = emailMatcher.group().trim();
+                    resume.setEmail(email);
+                }
+            }
+        }
+        
+        // Only extract phone if not already set
+        if (resume.getPhone() == null || resume.getPhone().isEmpty()) {
+            // Try different phone number patterns
+            String[] phonePatterns = {
+                // Pattern for phone numbers with labels (e.g., "Phone: +91-7338993710")
+                "(?i)(?:Mobile|Phone|Tel|Mob)[:\\s]+([+\\d\\s\\(\\)\\-]{10,20})",
+                // Pattern for standalone phone numbers with country code (e.g., "+91-7338993710" or "+917338993710")
+                "\\+?[0-9]{1,3}[-.\\s]?[0-9]{5}[-.\\s]?[0-9]{5}",
+                // Pattern for standard 10-digit Indian mobile numbers
+                "(?:\\+?91[\\s-]?)?[6-9]\\d{9}",
+                // Pattern for numbers in parentheses or with spaces/dashes
+                "\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})"
+            };
+
+            String phone = null;
+            
+            // Try each pattern until we find a match
+            for (String patternStr : phonePatterns) {
+                Pattern phonePattern = Pattern.compile(patternStr);
+                Matcher phoneMatcher = phonePattern.matcher(textContent);
+                
+                if (phoneMatcher.find()) {
+                    // Clean up the phone number - remove all non-digit characters
+                    phone = phoneMatcher.group().replaceAll("[^0-9]", "");
+                    
+                    // If we have a match, process it and break the loop
+                    if (phone != null && phone.length() >= 10) {
+                        break;
+                    }
+                }
+            }
+            
+            // If we found a phone number, clean it up
+            if (phone != null && !phone.isEmpty()) {
+                // Remove country codes (like +91, 91, 0091 for India)
+                if (phone.startsWith("91") && phone.length() > 10) {
+                    phone = phone.substring(2);
+                } else if (phone.startsWith("0") && phone.length() > 10) {
+                    phone = phone.substring(1);
+                }
+                
+                // Ensure we have exactly 10 digits (for Indian numbers)
+                if (phone.length() >= 10) {
+                    // Take only the last 10 digits if it's longer
+                    if (phone.length() > 10) {
+                        phone = phone.substring(phone.length() - 10);
+                    }
+                    
+                    // Basic validation for Indian mobile numbers
+                    if (phone.matches("[6-9]\\d{9}")) {
+                        resume.setPhone(phone);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Extract and set personal information from HTML content
+     * @deprecated Use extractContactInfo instead, as we now get name from the form
+     */
+//    @Deprecated
+//    private void extractAndSetPersonalInfo(Resume resume, String htmlContent) {
+//        // Just call extractContactInfo for backward compatibility
+//        extractContactInfo(resume, htmlContent);
+//    } else {
+//            // Fallback to simple phone pattern
+//            phonePattern = Pattern.compile("(\\+\\d{1,3}[-.\\(\\s]?)?\\(?\\d{3}\\)?[-.\\(\\s]?\\d{3}[-.\\(\\s]?\\d{4}");
+//            phoneMatcher = phonePattern.matcher(textContent);
+//            if (phoneMatcher.find()) {
+//                String phone = phoneMatcher.group().trim();
+//                // Clean the phone number and remove country code
+//                phone = phone.replaceAll("[^0-9+]", "");
+//
+//                // Remove country codes (like +91, 91, 0091 for India)
+//                if (phone.startsWith("+")) {
+//                    if (phone.startsWith("+91") && phone.length() > 12) {
+//                        phone = phone.substring(3);
+//                    }
+//                } else if (phone.startsWith("91") && phone.length() > 10) {
+//                    phone = phone.substring(2);
+//                } else if (phone.startsWith("0091") && phone.length() > 11) {
+//                    phone = phone.substring(4);
+//                }
+//
+//                if (phone.length() >= 10) {
+//                    if (phone.length() > 10) {
+//                        phone = phone.substring(phone.length() - 10);
+//                    }
+//                    resume.setPhone(phone);
+//                }
+//            }
+//        }
+//
+//        // First, try to extract name from the document content
+//        boolean nameFound = false;
+//
+//        // Pattern 1: Look for a line that looks like a name at the beginning of the document
+//        String[] lines = textContent.split("\\r?\\n");
+//        for (String line : lines) {
+//            line = line.trim();
+//            // Check if line looks like a name (starts with capital, has at least 2 words, no numbers, not too long)
+//            if (line.matches("^[A-Z][a-z]+(?:\\s+[A-Z][a-z]+)+$") && line.length() <= 50) {
+//                String[] nameParts = line.split("\\s+");
+//                if (nameParts.length >= 2) {
+//                    resume.setFirstName(nameParts[0]);
+//                    resume.setLastName(nameParts[nameParts.length - 1]);
+//                    nameFound = true;
+//                    log.debug("Found name in document: {} {}", resume.getFirstName(), resume.getLastName());
+//                    break;
+//                } else if (nameParts.length == 1) {
+//                    resume.setFirstName(nameParts[0]);
+//                    nameFound = true;
+//                    log.debug("Found first name in document: {}", resume.getFirstName());
+//                    break;
+//                }
+//            }
+//        }
+//
+//        // If name not found in document, try to extract from email (only if email exists)
+//        if (!nameFound && email != null) {
+//            String emailPrefix = email.split("@")[0];
+//            // Try to extract name from email if it follows common patterns
+//            if (emailPrefix.matches(".*\\.(com|org|net|io|co|in)$")) {
+//                // Skip if it's a domain-like prefix
+//                log.debug("Skipping email prefix as it looks like a domain: {}", emailPrefix);
+//            } else {
+//                // Try to split by common separators
+//                String[] nameParts = emailPrefix.split("[._-]");
+//                if (nameParts.length >= 2) {
+//                    // If we have at least two parts, assume first and last name
+//                    String firstName = nameParts[0];
+//                    String lastName = nameParts[nameParts.length - 1];
+//
+//                    // Basic validation - names should be at least 2 characters and not too long
+//                    if (firstName.length() >= 2 && firstName.length() <= 20 &&
+//                        lastName.length() >= 2 && lastName.length() <= 20) {
+//
+//                        // Capitalize first letter of each name part
+//                        firstName = firstName.substring(0, 1).toUpperCase() +
+//                                  (firstName.length() > 1 ? firstName.substring(1) : "");
+//                        lastName = lastName.substring(0, 1).toUpperCase() +
+//                                 (lastName.length() > 1 ? lastName.substring(1) : "");
+//
+//                        resume.setFirstName(firstName);
+//                        resume.setLastName(lastName);
+//                        nameFound = true;
+//                        log.debug("Extracted name from email: {} {}", firstName, lastName);
+//                    }
+//                } else if (nameParts.length == 1 && nameParts[0].length() >= 2 && nameParts[0].length() <= 20) {
+//                    // If only one part, use it as first name
+//                    String firstName = nameParts[0].substring(0, 1).toUpperCase() +
+//                                     (nameParts[0].length() > 1 ? nameParts[0].substring(1) : "");
+//                    resume.setFirstName(firstName);
+//                    nameFound = true;
+//                    log.debug("Extracted first name from email: {}", firstName);
+//                }
+//            }
+//        }
+//
+//        // If still no name found, log a warning
+//        if (!nameFound) {
+//            log.warn("Could not extract name from resume. Email: {}", email);
+//        }
+//
+//        // If we still don't have a name but have an email, use the part before @ as first name
+//        if ((resume.getFirstName() == null || resume.getFirstName().isEmpty()) && resume.getEmail() != null) {
+//            String emailName = resume.getEmail().split("@")[0];
+//            if (emailName.contains(".")) {
+//                String[] parts = emailName.split("\\.");
+//                resume.setFirstName(parts[0]);
+//                if (parts.length > 1) {
+//                    resume.setLastName(parts[parts.length - 1]);
+//                }
+//            } else {
+//                resume.setFirstName(emailName);
+//            }
+//        }
+//    }
+    
     /**
      * Check if search criteria has any non-null values
      */

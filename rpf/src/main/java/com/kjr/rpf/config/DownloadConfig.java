@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "app.download")
 public class DownloadConfig {
-    private int limit = 3;
+    private int limit = 100;
     private boolean limitEnabled = false;
 
     public int getLimit() {
